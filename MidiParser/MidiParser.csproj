@@ -39,19 +39,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Enums\MidiChannelEventTypeEnum.cs" />
+    <Compile Include="Entities\MidiEvents\BaseMidiChannelEvent.cs" />
+    <Compile Include="Entities\MidiEvents\NoteOffEvent.cs" />
+    <Compile Include="Entities\MidiEvents\NoteOnEvent.cs" />
     <Compile Include="Entities\MidiFile.cs" />
-    <Compile Include="Entities\MidiFormatTypeEnum.cs" />
+    <Compile Include="Entities\Enums\MidiFormatTypeEnum.cs" />
     <Compile Include="Entities\MidiHeader.cs" />
     <Compile Include="Entities\MidiTrack.cs" />
+    <Compile Include="Entities\TrackHeader.cs" />
     <Compile Include="Exceptions\InvalidMidiHeaderException.cs" />
     <Compile Include="Exceptions\InvalidHeaderLengthException.cs" />
     <Compile Include="Extensions\ByteArrayExtensions.cs" />
     <Compile Include="Exceptions\InvalidMidiFormatTypeException.cs" />
+    <Compile Include="Exceptions\InvalidChunkHeaderException.cs" />
     <Compile Include="MidiReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\TestFile.mid">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\_TestFile.mid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

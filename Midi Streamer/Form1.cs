@@ -15,7 +15,7 @@ namespace Midi_Streamer
         private void button1_Click(object sender, EventArgs e)
         {
             var midiParser = new MidiReader();
-            midiParser.Parse(Path.Combine(Application.StartupPath, "Resources", "TestFile.mid"));
+            midiParser.Parse(Path.Combine(Application.StartupPath, "Resources", "_TestFile.mid"));
         }
     }
 }
