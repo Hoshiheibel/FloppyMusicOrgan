@@ -8,5 +8,6 @@ namespace MidiParser.Entities
         public int HeaderLength { get; internal set; }
         public MidiFormatTypeEnum Format { get; internal set; }
         public int NumberOfTracks { get; internal set; }
+        public object TimeDivision { get; internal set; }
     }
 }

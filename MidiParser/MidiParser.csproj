@@ -50,7 +50,7 @@
     <Compile Include="Entities\TrackHeader.cs" />
     <Compile Include="Exceptions\InvalidMidiHeaderException.cs" />
     <Compile Include="Exceptions\InvalidHeaderLengthException.cs" />
-    <Compile Include="Extensions\ByteArrayExtensions.cs" />
+    <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Exceptions\InvalidMidiFormatTypeException.cs" />
     <Compile Include="Exceptions\InvalidChunkHeaderException.cs" />
     <Compile Include="MidiReader.cs" />

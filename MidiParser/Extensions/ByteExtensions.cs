@@ -3,7 +3,7 @@ using System.Text;
 
 namespace MidiParser.Extensions
 {
-    public static class ByteArrayExtensions
+    public static class ByteExtensions
     {
         public static string ConvertToString(this byte[] bytes)
         {
@@ -22,6 +22,16 @@ namespace MidiParser.Extensions
 
             // ToDo: Need to check more cases?
             return -1;
+        }
+
+        public static byte GetFirstNibble(this byte value)
+        {
+            return (byte)(value & 0x0F);
+        }
+
+        public static byte GetSecondNibble(this byte value)
+        {
+            return (byte)((value & 0xF0) >> 4);
         }
     }
 }
