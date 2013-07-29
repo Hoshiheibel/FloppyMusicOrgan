@@ -143,9 +143,36 @@ namespace MidiParser
                     {
                         switch (nextValue.GetFirstNibble())
                         {
-                                case 0x
+                            case 0x80:  // Note Off
+
+                                break;
+
+                            case 0x90:  // Note on
+                                ParseNoteOnEvent(memoryStream, nextValue.GetSecondNibble());
+                                break;
+
+                            case 0xA0:  // Key atertouch
+                                break;
+
+                            case 0xB0:  // Controller Change event
+                                break;
+
+                            case 0xC0:  // Program change
+                                ParseProgramChangeEvent(memoryStream, nextValue.GetSecondNibble());
+                                break;
+
+                            case 0xD0:  // Channel Aftertouch event
+                                break;
+
+                            case 0xE0:  // Pitch Bend event
+                                ParsePitchBendEvent(memoryStream, nextValue.GetSecondNibble());
+                                break;
+
+                            case 0xF0:
+                                break;
                         }
-                        nextValue.GetFirstNibble() == 0xF0
+
+                        //nextValue.GetFirstNibble() == 0xF0;
                     }
                 }
             }
@@ -254,6 +281,24 @@ namespace MidiParser
                 (Exception)
             {
             }
+        }
+
+        private void ParseNoteOnEvent(MemoryStream memoryStream, int channelNumber)
+        {
+            var noteNumber = memoryStream.ReadByte();
+            var velocity = memoryStream.ReadByte();
+        }
+
+        private void ParsePitchBendEvent(MemoryStream memoryStream, int channelNumber)
+        {
+            memoryStream.ReadByte();
+            memoryStream.ReadByte();
+        }
+
+        private void ParseProgramChangeEvent(MemoryStream memoryStream, int channelNumber)
+        {
+            // Ignore this event for the moment, maybe implement it later
+            var programNumber = memoryStream.ReadByte();
         }
 
         private void ReadMetaEvent(MemoryStream memoryStream)

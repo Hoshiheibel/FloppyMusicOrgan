@@ -26,12 +26,12 @@ namespace MidiParser.Extensions
 
         public static byte GetFirstNibble(this byte value)
         {
-            return (byte)(value & 0x0F);
+            return (byte)(value & 0xF0);
         }
 
         public static byte GetSecondNibble(this byte value)
         {
-            return (byte)((value & 0xF0) >> 4);
+            return (byte)(value & 0x0F);
         }
     }
 }
