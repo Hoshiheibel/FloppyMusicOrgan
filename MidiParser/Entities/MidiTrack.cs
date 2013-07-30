@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using MidiParser.Entities.MidiEvents;
 
 namespace MidiParser.Entities
 {
     public class MidiTrack
     {
         public TrackHeader TrackHeader { get; set; }
-        public string TrackDescription { get; set; }
         public int TrackLength { get; set; }
+        public List<BaseMidiChannelEvent> TrackEventChain { get; set; }
 
         public MidiTrack()
         {
             TrackHeader = new TrackHeader();
+            TrackEventChain = new List<BaseMidiChannelEvent>();
         }
     }
 }

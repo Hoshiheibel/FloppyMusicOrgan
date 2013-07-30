@@ -2,11 +2,14 @@
 using System.IO;
 using System.Windows.Forms;
 using MidiParser;
+using MidiParser.Entities;
 
 namespace Midi_Streamer
 {
     public partial class Form1 : Form
     {
+        private ParsedMidiFile _parsedMidiFile;
+
         public Form1()
         {
             InitializeComponent();
@@ -15,7 +18,7 @@ namespace Midi_Streamer
         private void button1_Click(object sender, EventArgs e)
         {
             var midiParser = new MidiReader();
-            midiParser.Parse(Path.Combine(Application.StartupPath, "Resources", "_TestFile.mid"));
+            _parsedMidiFile = midiParser.Parse(Path.Combine(Application.StartupPath, "Resources", "_TestFile.mid"));
         }
     }
 }

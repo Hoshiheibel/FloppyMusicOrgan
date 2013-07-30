@@ -43,7 +43,7 @@
     <Compile Include="Entities\MidiEvents\BaseMidiChannelEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOffEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOnEvent.cs" />
-    <Compile Include="Entities\MidiFile.cs" />
+    <Compile Include="Entities\ParsedMidiFile.cs" />
     <Compile Include="Entities\Enums\MidiFormatTypeEnum.cs" />
     <Compile Include="Entities\MidiHeader.cs" />
     <Compile Include="Entities\MidiTrack.cs" />

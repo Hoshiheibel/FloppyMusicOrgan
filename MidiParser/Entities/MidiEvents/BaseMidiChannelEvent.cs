@@ -2,7 +2,7 @@
 {
     public class BaseMidiChannelEvent
     {
-        public int DeltaTime { get; set; }
-        public int Channel { get; set; }
+        public long DeltaTime { get; set; }
+        public int ChannelNumber { get; set; }
     }
 }
