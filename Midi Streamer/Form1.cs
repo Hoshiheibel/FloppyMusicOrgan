@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using ComPortStreamer;
 using MidiParser;
 using MidiParser.Entities;
 
@@ -19,6 +20,7 @@ namespace Midi_Streamer
         {
             var midiParser = new MidiReader();
             _parsedMidiFile = midiParser.Parse(Path.Combine(Application.StartupPath, "Resources", "_TestFile.mid"));
+            var streamer = new ComStreamer();
         }
     }
 }

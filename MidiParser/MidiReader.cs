@@ -84,8 +84,10 @@ namespace MidiParser
 
         private void ReadTimeDivision()
         {
-            var timeDivision = _fileReader.ReadBytes(2).ConvertToInt();
-            _parsedMidiFile.MidiHeader.TimeDivision = timeDivision;
+            // ToDo: parse FramesPerSecond correctly, only works for TicksPerBeat at the moment
+            var timeDivision = _fileReader.ReadBytes(2);
+            _parsedMidiFile.TimeDivisionType = (TimeDivisionType) (timeDivision[0] & 0x80);
+            _parsedMidiFile.MidiHeader.TimeDivision = timeDivision.ConvertToInt();
         }
 
         private void ReadTrackChunks()
@@ -310,6 +312,7 @@ namespace MidiParser
 
         private static void ParsePitchBendEvent(Stream stream, int channelNumber)
         {
+            // Ignore this event for the moment, maybe implement it later
             stream.ReadByte();
             stream.ReadByte();
         }
