@@ -27,9 +27,20 @@ namespace MidiParser
             {
                 ReadHeaderChunk();
                 ReadTrackChunks();
+                ConvertTracks();
             }
 
             return _parsedMidiFile;
+        }
+
+        private void ConvertTracks()
+        {
+            foreach (var track in _parsedMidiFile.Tracks)
+            {
+                var convertedTrack = new ConvertedMidiTrack();
+                convertedTrack.BuildTimeLine(track);
+                _parsedMidiFile.ConvertedTracks.Add(convertedTrack);
+            }
         }
 
         private static bool IsInvalidMidiFormatType(int fileType)

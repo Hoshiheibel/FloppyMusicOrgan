@@ -31,7 +31,7 @@ namespace ComOutput
                 _port = new SerialPort(portName, 115200, Parity.None, 8, StopBits.One);
                 _port.Open();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }
@@ -43,14 +43,21 @@ namespace ComOutput
         {
             if (_port.IsOpen)
                 _port.Close();
-
-            _port.Dispose();
         }
 
-        public void SendCommand(byte pin, byte x, byte y)
+        public void SendCommand(byte pin, int periodData)
         {
-            var message = new[] {pin, x, y};
+            var message = new[] { pin, (byte)((periodData >> 8) & 0xFF), (byte)(periodData & 0xFF) };
             _port.Write(message, 0, 3);
+        }
+
+        public void Dispose()
+        {
+            if (_port != null)
+            {
+                _port.Dispose();
+                _port = null;
+            }
         }
     }
 }

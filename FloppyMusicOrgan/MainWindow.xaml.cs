@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using ComOutput;
@@ -39,14 +40,26 @@ namespace FloppyMusicOrgan
             if (!_isConnectedToComPort)
             {
                 _isConnectedToComPort = _comStreamer.Connect("COM3");
-                var midiPlayer = new MidiPlayer.MidiPlayer(_comStreamer);
-                midiPlayer.Play();
             }
             else
             {
                 _comStreamer.Disconnect();
                 _isConnectedToComPort = false;
             }
+        }
+
+        private void BtnPlayTest_OnClick(object sender, RoutedEventArgs e)
+        {
+            var midiPlayer = new MidiPlayer.MidiPlayer(_comStreamer);
+            midiPlayer.PlayTest();
+        }
+
+        private void MainWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            if (_isConnectedToComPort)
+                _comStreamer.Disconnect();
+
+            _comStreamer.Dispose();
         }
     }
 }
