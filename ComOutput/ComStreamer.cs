@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Linq;
+using System.Text;
 using System.Threading;
 
 namespace ComOutput
@@ -48,7 +50,14 @@ namespace ComOutput
         public void SendCommand(byte pin, int periodData)
         {
             var message = new[] { pin, (byte)((periodData >> 8) & 0xFF), (byte)(periodData & 0xFF) };
+            System.Diagnostics.Trace.WriteLine("\"" + (int)message[0] + "\" / " + "\"" + (int)message[1] + "\" / " + "\"" + (int)message[2] + "\" / ");
             _port.Write(message, 0, 3);
+        }
+
+        public void SendCommand(byte[] message)
+        {
+            _port.Write(message, 0, message.Length);
+            System.Diagnostics.Trace.WriteLine("\"" + (int)message[0] + "\" / " + "\"" + (int)message[1] + "\" / " + "\"" + (int)message[2] + "\" / ");
         }
 
         public void Dispose()

@@ -24,10 +24,11 @@ namespace FloppyMusicOrgan
         private void BtnLoadMidi_OnClick(object sender, RoutedEventArgs e)
         {
             var midiParser = new MidiReader();
-            _parsedMidiFile = midiParser.Parse(Path.Combine(
-                Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
-                "Resources",
-                "_TestFile.mid"));
+            ////_parsedMidiFile = midiParser.Parse(Path.Combine(
+            ////    Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
+            ////    "Resources",
+            ////    "_TestFile.mid"));
+            _parsedMidiFile = midiParser.Parse(@"E:\Floppy\happybirthday_01.mid");
         }
 
         private void BtnResetDrives_OnClick(object sender, RoutedEventArgs e)
@@ -51,7 +52,7 @@ namespace FloppyMusicOrgan
         private void BtnPlayTest_OnClick(object sender, RoutedEventArgs e)
         {
             var midiPlayer = new MidiPlayer.MidiPlayer(_comStreamer);
-            midiPlayer.PlayTest();
+            midiPlayer.Play(_parsedMidiFile.ConvertedTrack);
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)

@@ -1,5 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
+using System.Timers;
 using ComOutput;
+using MidiParser.Entities;
+using Timer = System.Timers.Timer;
 
 namespace MidiPlayer
 {
@@ -20,14 +24,43 @@ namespace MidiPlayer
         };
 
         private readonly ComStreamer _comStreamer;
+        private MicroTimer _timer;
+        private ConvertedMidiTrack _track;
+        private int _currentTrackPosition;
+        private DateTime _startTime;
 
         public MidiPlayer(ComStreamer comStreamer)
         {
             _comStreamer = comStreamer;
         }
 
-        public void Play()
+        public void Play(ConvertedMidiTrack track)
         {
+            _timer = new MicroTimer();
+            _timer.MicroTimerElapsed += MicroTimerOnElapsed;
+            _track = track;
+            _startTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, 1));
+            _timer.Interval = 1000;
+            _timer.Enabled = true;
+            _timer.Start();
+        }
+
+        private void MicroTimerOnElapsed(object sender, MicroTimerEventArgs elapsedEventArgs)
+        {
+            if (_currentTrackPosition < _track.MessageList.Count)
+            {
+                var message = _track.MessageList[_currentTrackPosition];
+                _timer.Interval = message.RelativeTimePosition * 1000;
+                
+                System.Diagnostics.Trace.WriteLine(_timer.Interval + " / " + _currentTrackPosition);
+                
+                _comStreamer.SendCommand(message.ComMessage);
+                _currentTrackPosition++;
+            }
+            else
+            {
+                _timer.Stop();
+            }
         }
 
         public void PlayTest()

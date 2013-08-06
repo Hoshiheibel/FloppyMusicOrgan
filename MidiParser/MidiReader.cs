@@ -35,12 +35,10 @@ namespace MidiParser
 
         private void ConvertTracks()
         {
-            foreach (var track in _parsedMidiFile.Tracks)
-            {
-                var convertedTrack = new ConvertedMidiTrack();
-                convertedTrack.BuildTimeLine(track);
-                _parsedMidiFile.ConvertedTracks.Add(convertedTrack);
-            }
+            var midiTrackConverter = new MidiTrackConverter();
+
+            var convertedTrack = midiTrackConverter.BuildTimeLine(_parsedMidiFile.Tracks, _parsedMidiFile.MidiHeader.TimeDivision);
+            _parsedMidiFile.ConvertedTrack = convertedTrack;
         }
 
         private static bool IsInvalidMidiFormatType(int fileType)

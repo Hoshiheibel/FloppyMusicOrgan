@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Entities\ArduinoMessage.cs" />
     <Compile Include="Entities\ConvertedMidiTrack.cs" />
+    <Compile Include="Entities\MidiTrackConverter.cs" />
     <Compile Include="Entities\Enums\TimeDivisionType.cs" />
     <Compile Include="Entities\Enums\MidiChannelEventTypeEnum.cs" />
     <Compile Include="Entities\MidiEvents\BaseMidiChannelEvent.cs" />
