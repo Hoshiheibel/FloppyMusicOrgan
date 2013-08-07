@@ -28,14 +28,15 @@ namespace MidiParser.Entities
         public ConvertedMidiTrack BuildTimeLine(IEnumerable<MidiTrack> tracks, long ticksPerSecond)
         {
             var convertedMidiTrack = new ConvertedMidiTrack();
-            var currentTimePosition = new TimeSpan();
             _ticksPerSecond = ticksPerSecond;
 
             foreach (var midiTrack in tracks)
             {
+                var currentTimePosition = new TimeSpan();
+
                 foreach (var midiEvent in midiTrack.TrackEventChain)
                 {
-                    ParseAndAddMessage(midiEvent, convertedMidiTrack, currentTimePosition);
+                    currentTimePosition = ParseAndAddMessage(midiEvent, convertedMidiTrack, currentTimePosition);
                 }
             }
 
@@ -43,21 +44,22 @@ namespace MidiParser.Entities
             return convertedMidiTrack;
         }
 
-        private void ParseAndAddMessage(BaseMidiChannelEvent midiEvent, ConvertedMidiTrack convertedMidiTrack, TimeSpan lastTime)
+        private TimeSpan ParseAndAddMessage(BaseMidiChannelEvent midiEvent, ConvertedMidiTrack convertedMidiTrack, TimeSpan lastTime)
         {
-            var timePosition = lastTime.Add(new TimeSpan(0, 0, 0, 0, (int)(midiEvent.DeltaTime * _ticksPerSecond / 1000)));
+            var timePosition = lastTime.Add(new TimeSpan(0, 0, 0, 0, (int)(midiEvent.DeltaTime * _ticksPerSecond / 100)));
 
             if (midiEvent is NoteOnEvent)
             {
                 var message = convertedMidiTrack.MessageList.SingleOrDefault(m => m.AbsoluteTimePosition.Equals(timePosition));
+                var period = MicroPeriods[((NoteOnEvent) midiEvent).Note] / (ArduinoResolution * 2);
 
                 if (message != null)
                 {
                     message.ComMessage = message.ComMessage.Concat(new[]
                     {
                         (byte) ((midiEvent.ChannelNumber + 1) * 2),
-                        (byte) 0,
-                        (byte) (MicroPeriods[((NoteOnEvent) midiEvent).Note]/ArduinoResolution*2)
+                        (byte) ((period >> 8) & 0xFF),
+                        (byte) (period & 0xFF)
                     })
                     .ToArray();
                 }
@@ -66,12 +68,12 @@ namespace MidiParser.Entities
                     convertedMidiTrack.MessageList.Add(new ArduinoMessage
                     {
                         AbsoluteTimePosition = timePosition,
-                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond / 1000,
+                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         ComMessage = new[]
                         {
                             (byte) ((midiEvent.ChannelNumber + 1) * 2),
-                            (byte) 0,
-                            (byte) (MicroPeriods[((NoteOnEvent) midiEvent).Note]/ArduinoResolution*2)
+                            (byte) ((period >> 8) & 0xFF),
+                            (byte) (period & 0xFF)
                         }
                     });
                 }
@@ -86,7 +88,7 @@ namespace MidiParser.Entities
                     {
                         (byte) ((midiEvent.ChannelNumber + 1) * 2),
                         (byte) 0,
-                        (byte) (MicroPeriods[((NoteOffEvent) midiEvent).Note]/ArduinoResolution*2)
+                        (byte) 0
                     })
                     .ToArray();
                 }
@@ -95,7 +97,7 @@ namespace MidiParser.Entities
                     convertedMidiTrack.MessageList.Add(new ArduinoMessage
                     {
                         AbsoluteTimePosition = timePosition,
-                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond / 1000,
+                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         ComMessage = new[]
                         {
                             (byte) ((midiEvent.ChannelNumber + 1) * 2),
@@ -105,6 +107,8 @@ namespace MidiParser.Entities
                     });
                 }
             }
+
+            return timePosition;
         }
     }
 }

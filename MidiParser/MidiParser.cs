@@ -8,7 +8,7 @@ using MidiParser.Extensions;
 
 namespace MidiParser
 {
-    public class MidiReader
+    public class MidiParser
     {
         private const string MidiFileFormatIdentifier = "MThd";
         private const string MidiTrackChunkIdentifier = "MTrk";
@@ -16,7 +16,7 @@ namespace MidiParser
         private readonly ParsedMidiFile _parsedMidiFile;
         private BinaryReader _fileReader;
         
-        public MidiReader()
+        public MidiParser()
         {
             _parsedMidiFile = new ParsedMidiFile();
         }
@@ -166,9 +166,13 @@ namespace MidiParser
                                 break;
 
                             case 0xA0:  // Key atertouch
+                                memoryStream.ReadByte();
+                                memoryStream.ReadByte();
                                 break;
 
                             case 0xB0:  // Controller Change event
+                                memoryStream.ReadByte();
+                                memoryStream.ReadByte();
                                 break;
 
                             case 0xC0:  // Program change

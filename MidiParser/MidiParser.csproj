@@ -57,7 +57,8 @@
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Exceptions\InvalidMidiFormatTypeException.cs" />
     <Compile Include="Exceptions\InvalidChunkHeaderException.cs" />
-    <Compile Include="MidiReader.cs" />
+    <Compile Include="Extensions\LinqExtensions.cs" />
+    <Compile Include="MidiParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

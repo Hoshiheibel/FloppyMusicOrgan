@@ -50,9 +50,7 @@ namespace MidiPlayer
             if (_currentTrackPosition < _track.MessageList.Count)
             {
                 var message = _track.MessageList[_currentTrackPosition];
-                _timer.Interval = message.RelativeTimePosition * 1000;
-                
-                System.Diagnostics.Trace.WriteLine(_timer.Interval + " / " + _currentTrackPosition);
+                _timer.Interval = message.RelativeTimePosition;
                 
                 _comStreamer.SendCommand(message.ComMessage);
                 _currentTrackPosition++;

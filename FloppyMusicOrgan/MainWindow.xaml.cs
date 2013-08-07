@@ -8,11 +8,12 @@ using MidiParser.Entities;
 
 namespace FloppyMusicOrgan
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         private ParsedMidiFile _parsedMidiFile;
         private readonly ComStreamer _comStreamer;
         private bool _isConnectedToComPort;
+        private bool _isFileLoaded;
 
         public MainWindow()
         {
@@ -23,12 +24,14 @@ namespace FloppyMusicOrgan
 
         private void BtnLoadMidi_OnClick(object sender, RoutedEventArgs e)
         {
-            var midiParser = new MidiReader();
+            var midiParser = new MidiParser.MidiParser();
             ////_parsedMidiFile = midiParser.Parse(Path.Combine(
             ////    Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
             ////    "Resources",
             ////    "_TestFile.mid"));
             _parsedMidiFile = midiParser.Parse(@"E:\Floppy\happybirthday_01.mid");
+            _isFileLoaded = true;
+            ToggleButtons();
         }
 
         private void BtnResetDrives_OnClick(object sender, RoutedEventArgs e)
@@ -41,12 +44,22 @@ namespace FloppyMusicOrgan
             if (!_isConnectedToComPort)
             {
                 _isConnectedToComPort = _comStreamer.Connect("COM3");
+                ToggleButtons();
+                btnConnectToSelectedComPort.Content = "Disconnect";
             }
             else
             {
                 _comStreamer.Disconnect();
                 _isConnectedToComPort = false;
+                ToggleButtons();
+                btnConnectToSelectedComPort.Content = "Connect";
             }
+        }
+
+        private void ToggleButtons()
+        {
+            btnPlay.IsEnabled = _isConnectedToComPort && _isFileLoaded;
+            btnResetDrives.IsEnabled = _isConnectedToComPort;
         }
 
         private void BtnPlayTest_OnClick(object sender, RoutedEventArgs e)

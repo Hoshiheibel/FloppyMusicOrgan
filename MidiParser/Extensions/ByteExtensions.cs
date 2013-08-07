@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace MidiParser.Extensions
@@ -9,6 +10,14 @@ namespace MidiParser.Extensions
         {
             ASCIIEncoding enc = new ASCIIEncoding();
             return enc.GetString(bytes);
+        }
+
+        public static IEnumerable<int> ConvertByteListToIntList(this IEnumerable<byte> bytes)
+        {
+            foreach (var b in bytes)
+            {
+                yield return BitConverter.ToInt16(new[] {(byte)0, b}, 0);
+            }
         }
 
         public static int ConvertToInt(this byte[] bytes)
