@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using MidiParser.Entities.MidiEvents;
 
-namespace MidiParser.Entities
+namespace MidiParser.Entities.MidiFile
 {
-    public class MidiTrack
+    public class Track
     {
         public TrackHeader TrackHeader { get; set; }
         public int TrackLength { get; set; }
         public List<BaseMidiChannelEvent> TrackEventChain { get; set; }
 
-        public MidiTrack()
+        public Track()
         {
             TrackHeader = new TrackHeader();
             TrackEventChain = new List<BaseMidiChannelEvent>();

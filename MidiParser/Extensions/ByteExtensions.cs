@@ -23,7 +23,6 @@ namespace MidiParser.Extensions
         public static int ConvertToInt(this byte[] bytes)
         {
             Array.Reverse(bytes);
-
             if (bytes.Length == 4)
                 return BitConverter.ToInt32(bytes, 0);
             if (bytes.Length == 2)
@@ -31,6 +30,11 @@ namespace MidiParser.Extensions
 
             // ToDo: Need to check more cases?
             return -1;
+        }
+
+        public static long ConvertToLong(this byte[] bytes)
+        {
+            return BitConverter.ToInt64(bytes, 0);
         }
 
         public static byte GetFirstNibble(this byte value)

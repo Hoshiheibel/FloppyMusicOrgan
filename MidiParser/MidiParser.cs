@@ -3,6 +3,7 @@ using System.IO;
 using MidiParser.Entities;
 using MidiParser.Entities.Enums;
 using MidiParser.Entities.MidiEvents;
+using MidiParser.Entities.MidiFile;
 using MidiParser.Exceptions;
 using MidiParser.Extensions;
 
@@ -13,15 +14,17 @@ namespace MidiParser
         private const string MidiFileFormatIdentifier = "MThd";
         private const string MidiTrackChunkIdentifier = "MTrk";
 
-        private readonly ParsedMidiFile _parsedMidiFile;
+        private MidiEventTypeEnum _currentEventType;
+        private readonly MidiFile _midiFile;
         private BinaryReader _fileReader;
+        private byte _lastStatus;
         
         public MidiParser()
         {
-            _parsedMidiFile = new ParsedMidiFile();
+            _midiFile = new MidiFile();
         }
 
-        public ParsedMidiFile Parse(string fileName)
+        public MidiFile Parse(string fileName)
         {
             using (_fileReader = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
@@ -30,15 +33,15 @@ namespace MidiParser
                 ConvertTracks();
             }
 
-            return _parsedMidiFile;
+            return _midiFile;
         }
 
         private void ConvertTracks()
         {
             var midiTrackConverter = new MidiTrackConverter();
 
-            var convertedTrack = midiTrackConverter.BuildTimeLine(_parsedMidiFile.Tracks, _parsedMidiFile.MidiHeader.TimeDivision);
-            _parsedMidiFile.ConvertedTrack = convertedTrack;
+            var convertedTrack = midiTrackConverter.BuildTimeLine(_midiFile.Tracks, _midiFile.FileHeader.TimeDivision, _midiFile.BPM);
+            _midiFile.ConvertedTrack = convertedTrack;
         }
 
         private static bool IsInvalidMidiFormatType(int fileType)
@@ -62,7 +65,7 @@ namespace MidiParser
             if (!string.Equals(fileIdentifier, MidiFileFormatIdentifier))
                 throw new InvalidMidiHeaderException();
 
-            _parsedMidiFile.MidiHeader.FileIdentifier = fileIdentifier;
+            _midiFile.FileHeader.FileIdentifier = fileIdentifier;
         }
 
         private void ReadHeaderLength()
@@ -72,7 +75,7 @@ namespace MidiParser
             if (headerLength != 6)
                 throw new InvalidHeaderLengthException();
 
-            _parsedMidiFile.MidiHeader.HeaderLength = headerLength;
+            _midiFile.FileHeader.HeaderLength = headerLength;
         }
 
         private void ReadMidiFormatType()
@@ -82,28 +85,28 @@ namespace MidiParser
             if (IsInvalidMidiFormatType(formatType))
                 throw new InvalidMidiFormatTypeException();
 
-            _parsedMidiFile.MidiHeader.Format = (MidiFormatTypeEnum) formatType;
+            _midiFile.FileHeader.Format = (MidiFormatTypeEnum) formatType;
         }
 
         private void ReadTrackCount()
         {
             var trackCount = _fileReader.ReadBytes(2).ConvertToInt();
-            _parsedMidiFile.MidiHeader.NumberOfTracks = trackCount;
+            _midiFile.FileHeader.NumberOfTracks = trackCount;
         }
 
         private void ReadTimeDivision()
         {
             // ToDo: parse FramesPerSecond correctly, only works for TicksPerBeat at the moment
             var timeDivision = _fileReader.ReadBytes(2);
-            _parsedMidiFile.TimeDivisionType = (TimeDivisionType) (timeDivision[0] & 0x80);
-            _parsedMidiFile.MidiHeader.TimeDivision = timeDivision.ConvertToInt();
+            _midiFile.TimeDivisionType = (TimeDivisionType) (timeDivision[0] & 0x80);
+            _midiFile.FileHeader.TimeDivision = timeDivision.ConvertToInt();
         }
 
         private void ReadTrackChunks()
         {
-            for (var i = 0; i < _parsedMidiFile.MidiHeader.NumberOfTracks; i++)
+            for (var i = 0; i < _midiFile.FileHeader.NumberOfTracks; i++)
             {
-                var track = new MidiTrack();
+                var track = new Track();
 
                 ReadTrackChunkId(track);
                 ReadTrackChunkSize(track);
@@ -113,17 +116,17 @@ namespace MidiParser
                     ParseTrack(memoryStream, track);
                 }
 
-                _parsedMidiFile.Tracks.Add(track);
+                _midiFile.Tracks.Add(track);
             }
         }
 
-        private void ReadTrackChunkSize(MidiTrack track)
+        private void ReadTrackChunkSize(Track track)
         {
             var trackLength = _fileReader.ReadBytes(4).ConvertToInt();
             track.TrackLength = trackLength;
         }
 
-        private void ReadTrackChunkId(MidiTrack track)
+        private void ReadTrackChunkId(Track track)
         {
             var trackHeaderIdentifier = _fileReader.ReadBytes(4).ConvertToString();
 
@@ -133,7 +136,7 @@ namespace MidiParser
             track.TrackHeader.TrackHeaderIdentifier = trackHeaderIdentifier;
         }
 
-        private static void ParseTrack(Stream memoryStream, MidiTrack track)
+        private void ParseTrack(Stream memoryStream, Track track)
         {
             //long pos = 0; // current position in data
             //bool running = false; // whether we're in running status
@@ -147,43 +150,60 @@ namespace MidiParser
                 while (memoryStream.Position < memoryStream.Length)
                 {
                     var deltaTime = GetDeltaTime(memoryStream);
-                    var nextValue = (byte) memoryStream.ReadByte();
-
-                    if (nextValue == 0xFF)
+                    var status = (byte) memoryStream.ReadByte();
+                    
+                    if (status == 0xFF)
                     {
-                        ReadMetaEvent(memoryStream);
+                        // Meta Event
+                        _currentEventType = MidiEventTypeEnum.MetaEvent;
+                        ReadMetaEvent(memoryStream, deltaTime, track);
+                    }
+                    else if (status == 0xF7)
+                    {
+                        // SysEx continuation
+                        _currentEventType = MidiEventTypeEnum.SysExContinuationEvent;
+                        ReadSysEx(memoryStream, deltaTime, track);
+                    }
+                    else if (status == 0xF0)
+                    {
+                        // SysEx
+                        _currentEventType = MidiEventTypeEnum.SysExEvent;
+                        ReadSysEx(memoryStream, deltaTime, track);
                     }
                     else
                     {
-                        switch (nextValue.GetFirstNibble())
+                        // if (status != 0) // with running status, 'status' can be zero.
+                        // Midi Event
+                        if ((status & 0x80) == 0)
+                            status = _lastStatus;
+
+                        switch (status.GetFirstNibble())
                         {
                             case 0x80:  // Note Off
-                                ParseNoteOffEvent(memoryStream, deltaTime, nextValue.GetSecondNibble(), track);
+                                ParseNoteOffEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
                             case 0x90:  // Note on
-                                ParseNoteOnEvent(memoryStream, deltaTime, nextValue.GetSecondNibble(), track);
+                                ParseNoteOnEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
-                            case 0xA0:  // Key atertouch
-                                memoryStream.ReadByte();
-                                memoryStream.ReadByte();
+                            case 0xA0:  // Key aftertouch
+                                ParseKeyAftertouchEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
                             case 0xB0:  // Controller Change event
-                                memoryStream.ReadByte();
-                                memoryStream.ReadByte();
+                                ParseControllerChangeEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
                             case 0xC0:  // Program change
-                                ParseProgramChangeEvent(memoryStream, nextValue.GetSecondNibble());
+                                ParseProgramChangeEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
                             case 0xD0:  // Channel Aftertouch event
                                 break;
 
                             case 0xE0:  // Pitch Bend event
-                                ParsePitchBendEvent(memoryStream, nextValue.GetSecondNibble());
+                                ParsePitchBendEvent(memoryStream, status.GetSecondNibble());
                                 break;
 
                             case 0xF0:
@@ -194,125 +214,79 @@ namespace MidiParser
                     }
                 }
             }
-                //        // Are we continuing a sys ex?  If so, the next value better be 0x7F
-                //        if (sysExContinue && (nextValue != 0x7f)) throw new MidiParserException("Expected to find a system exclusive continue byte.", pos);
-
-                //        // Are we in running status?  Determine whether we're running and
-                //        // what the current status byte is.
-                //        if ((nextValue & 0x80) == 0)
-                //        {
-                //            // We're now in running status... if the last status was 0, uh oh!
-                //            if (status == 0) throw new MidiParserException("Status byte required for running status.", pos);
-
-                //            // Keep the last iteration's status byte, and now we're in running mode
-                //            running = true;
-                //        }
-                //        else
-                //        {
-                //            // Not running, so store the current status byte and mark running as false
-                //            status = nextValue;
-                //            running = false;
-                //        }
-
-                //        // Grab the 4-bit identifier
-                //        byte messageType = (byte)((status >> 4) & 0xF);
-
-                //        MidiEvent tempEvent = null;
-
-                //        // Handle voice events
-                //        if (messageType >= 0x8 && messageType <= 0xE)
-                //        {
-                //            if (!running) pos++; // if we're running, we don't advance; if we're not running, we do
-                //            byte channel = (byte)(status & 0xF); // grab the channel from the status byte
-                //            tempEvent = ParseVoiceEvent(deltaTime, messageType, channel, data, ref pos);
-                //        }
-                //        // Handle meta events
-                //        else if (status == 0xFF)
-                //        {
-                //            pos++;
-                //            byte eventType = data[pos];
-                //            pos++;
-                //            tempEvent = ParseMetaEvent(deltaTime, eventType, data, ref pos);
-                //        }
-                //        // Handle system exclusive events
-                //        else if (status == 0xF0)
-                //        {
-                //            pos++;
-                //            long length = ReadVariableLength(data, ref pos); // figure out how much data to read
-
-                //            // If this is single-segment message, process the whole thing
-                //            if (data[pos + length - 1] == 0xF7)
-                //            {
-                //                sysExData = new byte[length - 1];
-                //                Array.Copy(data, (int)pos, sysExData, 0, (int)length - 1);
-                //                tempEvent = new SystemExclusiveMidiEvent(deltaTime, sysExData);
-                //            }
-                //            // It's multi-segment, so add the new data to the previously aquired data
-                //            else
-                //            {
-                //                // Add to previously aquired sys ex data
-                //                int oldLength = (sysExData == null ? 0 : sysExData.Length);
-                //                byte[] newSysExData = new byte[oldLength + length];
-                //                if (sysExData != null) sysExData.CopyTo(newSysExData, 0);
-                //                Array.Copy(data, (int)pos, newSysExData, oldLength, (int)length);
-                //                sysExData = newSysExData;
-                //                sysExContinue = true;
-                //            }
-                //            pos += length;
-                //        }
-                //        // Handle system exclusive continuations
-                //        else if (status == 0xF7)
-                //        {
-                //            if (!sysExContinue) sysExData = null;
-
-                //            // Figure out how much data there is
-                //            pos++;
-                //            long length = ReadVariableLength(data, ref pos);
-
-                //            // Add to previously aquired sys ex data
-                //            int oldLength = (sysExData == null ? 0 : sysExData.Length);
-                //            byte[] newSysExData = new byte[oldLength + length];
-                //            if (sysExData != null) sysExData.CopyTo(newSysExData, 0);
-                //            Array.Copy(data, (int)pos, newSysExData, oldLength, (int)length);
-                //            sysExData = newSysExData;
-
-                //            // Make it a system message if necessary (i.e. if we find an end marker)
-                //            if (data[pos + length - 1] == 0xF7)
-                //            {
-                //                tempEvent = new SystemExclusiveMidiEvent(deltaTime, sysExData);
-                //                sysExData = null;
-                //                sysExContinue = false;
-                //            }
-                //        }
-                //        // Nothing we know about
-                //        else throw new MidiParserException("Invalid status byte found.", pos);
-
-                //        // Add the newly parsed event if we got one
-                //        if (tempEvent != null) track.Events.Add(tempEvent);
-                //    }
-
-                //    // Return the newly populated track
-                //    return track;
-                //}
-
             catch
-                (Exception)
+                (Exception ex)
             {
+                System.Diagnostics.Trace.WriteLine(ex.Message);
             }
         }
 
-        private static void ParseNoteOffEvent(Stream stream, long deltaTime, int channelNumber, MidiTrack track)
+        private void ParseControllerChangeEvent(Stream stream, long deltaTime, int channelNumber, Track track)
         {
-            track.TrackEventChain.Add(new NoteOffEvent
+            stream.ReadByte();
+            stream.ReadByte();
+
+            track.TrackEventChain.Add(new BaseMidiChannelEvent
             {
-                Note = stream.ReadByte(),
-                Velocity = stream.ReadByte(),
                 ChannelNumber = channelNumber,
                 DeltaTime = deltaTime
             });
         }
 
-        private static void ParseNoteOnEvent(Stream stream, long deltaTime, int channelNumber, MidiTrack track)
+        private void ParseKeyAftertouchEvent(Stream stream, long deltaTime, int channelNumber, Track track)
+        {
+            stream.ReadByte();
+            stream.ReadByte();
+
+            track.TrackEventChain.Add(new BaseMidiChannelEvent
+            {
+                ChannelNumber = channelNumber,
+                DeltaTime = deltaTime
+            });
+        }
+
+        private void ReadSysEx(Stream stream, long deltaTime, Track track)
+        {
+            var length = GetVariableLengthValue(stream);
+
+            if (_currentEventType == MidiEventTypeEnum.SysExContinuationEvent)
+                stream.Seek(length, SeekOrigin.Current);
+            else
+                stream.Seek(length + 1, SeekOrigin.Current);
+
+            track.TrackEventChain.Add(new BaseMidiChannelEvent
+            {
+                DeltaTime = deltaTime
+            });
+        }
+
+        private static void ParseTempoChangeEvent(Stream stream, long deltaTime, Track track)
+        {
+            var microsecondsPerQuarterNote = new byte[4];
+            stream.Read(microsecondsPerQuarterNote, 1, 3);
+
+            track.TrackEventChain.Add(new TempoChangeEvent
+            {
+                BPM = 60 * 1000 * 1000 / microsecondsPerQuarterNote.ConvertToInt(),
+                DeltaTime = deltaTime
+            });
+        }
+
+        private static void ParseNoteOffEvent(Stream stream, long deltaTime, int channelNumber, Track track)
+        {
+            var noteEvent = new NoteOffEvent
+            {
+                Note = stream.ReadByte(),
+                Velocity = stream.ReadByte(),
+                ChannelNumber = channelNumber,
+                DeltaTime = deltaTime
+            };
+
+            if (noteEvent.Velocity != 0);
+                track.TrackEventChain.Add(noteEvent);
+        }
+
+        private static void ParseNoteOnEvent(Stream stream, long deltaTime, int channelNumber, Track track)
         {
             track.TrackEventChain.Add(new NoteOnEvent
             {
@@ -326,24 +300,42 @@ namespace MidiParser
         private static void ParsePitchBendEvent(Stream stream, int channelNumber)
         {
             // Ignore this event for the moment, maybe implement it later
-            stream.ReadByte();
+            var x = stream.ReadByte();
+            x = stream.ReadByte();
+        }
+
+        private static void ParseProgramChangeEvent(Stream stream, long deltaTime, int channelNumber, Track track)
+        {
+            track.TrackEventChain.Add(new BaseMidiChannelEvent
+            {
+                ChannelNumber = channelNumber,
+                DeltaTime = deltaTime
+            });
+
             stream.ReadByte();
         }
 
-        private static void ParseProgramChangeEvent(Stream stream, int channelNumber)
+        private static void ReadMetaEvent(Stream stream, long deltaTime, Track track)
         {
-            // Ignore this event for the moment, maybe implement it later
-            var programNumber = stream.ReadByte();
-        }
-
-        private static void ReadMetaEvent(Stream stream)
-        {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
-
-            stream.ReadByte(); // MetaEventType -> ignored for the moment
+            var eventType = (byte)stream.ReadByte();
             var length = GetVariableLengthValue(stream);
-            stream.Seek(length, SeekOrigin.Current);
+
+            switch (eventType)
+            {
+                case 0x51:
+                    ParseTempoChangeEvent(stream, deltaTime, track);
+                    break;
+
+                default:
+                    stream.Seek(length, SeekOrigin.Current);
+                    
+                    track.TrackEventChain.Add(new BaseMidiChannelEvent
+                    {
+                        DeltaTime = deltaTime
+                    });
+
+                    break;
+            }
         }
 
         private static long GetDeltaTime(Stream stream)

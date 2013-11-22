@@ -4,7 +4,8 @@ namespace MidiParser.Entities
 {
     public class ConvertedMidiTrack
     {
-        public List<ArduinoMessage> MessageList { get; set; } 
+        public List<ArduinoMessage> MessageList { get; set; }
+        public int BPM { get; set; }
 
         public ConvertedMidiTrack()
         {
@@ -16,9 +17,9 @@ namespace MidiParser.Entities
     {
         public int Compare(ArduinoMessage x, ArduinoMessage y)
         {
-            if (x.AbsoluteTimePosition < y.AbsoluteTimePosition)
+            if (x.AbsoluteDeltaTimePosition < y.AbsoluteDeltaTimePosition)
                 return -1;
-            else if (x.AbsoluteTimePosition > y.AbsoluteTimePosition)
+            else if (x.AbsoluteDeltaTimePosition > y.AbsoluteDeltaTimePosition)
                 return 1;
 
             return 0;

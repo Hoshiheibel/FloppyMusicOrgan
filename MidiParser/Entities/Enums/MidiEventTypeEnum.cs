@@ -1,6 +1,6 @@
 ﻿namespace MidiParser.Entities.Enums
 {
-    public enum MidiChannelEventTypeEnum
+    public enum MidiEventTypeEnum
     {
         NoteOf = 0x8,
         NoteOn = 0x9,
@@ -8,6 +8,9 @@
         Controller = 0xB,
         ProgramChange = 0xC,
         ChannelAftertouch = 0xD,
-        PitchBend = 0xE
+        PitchBend = 0xE,
+        MetaEvent = 0xFF,
+        SysExContinuationEvent = 0xF7,
+        SysExEvent = 0xF0
     }
 }

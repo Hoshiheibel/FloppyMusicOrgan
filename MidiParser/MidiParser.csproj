@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,19 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\TempoChangeDummyMessage.cs" />
     <Compile Include="Entities\ArduinoMessage.cs" />
     <Compile Include="Entities\ConvertedMidiTrack.cs" />
+    <Compile Include="Entities\MidiEvents\TempoChangeEvent.cs" />
+    <Compile Include="Entities\MidiFile\FileHeader.cs" />
+    <Compile Include="Entities\MidiFile\MidiFile.cs" />
+    <Compile Include="Entities\MidiFile\Track.cs" />
+    <Compile Include="Entities\MidiFile\TrackHeader.cs" />
     <Compile Include="Entities\MidiTrackConverter.cs" />
     <Compile Include="Entities\Enums\TimeDivisionType.cs" />
-    <Compile Include="Entities\Enums\MidiChannelEventTypeEnum.cs" />
+    <Compile Include="Entities\Enums\MidiEventTypeEnum.cs" />
     <Compile Include="Entities\MidiEvents\BaseMidiChannelEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOffEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOnEvent.cs" />
-    <Compile Include="Entities\ParsedMidiFile.cs" />
     <Compile Include="Entities\Enums\MidiFormatTypeEnum.cs" />
-    <Compile Include="Entities\MidiHeader.cs" />
-    <Compile Include="Entities\MidiTrack.cs" />
-    <Compile Include="Entities\TrackHeader.cs" />
     <Compile Include="Exceptions\InvalidMidiHeaderException.cs" />
     <Compile Include="Exceptions\InvalidHeaderLengthException.cs" />
     <Compile Include="Extensions\ByteExtensions.cs" />
@@ -65,10 +68,13 @@
     <Content Include="Resources\TestFile.mid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\_gp_v06.mid" />
+    <Content Include="Resources\_gp_v10.mid" />
     <Content Include="Resources\_TestFile.mid">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

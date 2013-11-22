@@ -8,19 +8,20 @@ namespace ComOutput
 {
     public class ComStreamer
     {
-        private readonly List<string> _availableComPorts = new List<string>();
         private SerialPort _port;
 
-        public void GetAvailableComPorts()
+        public ComStreamer()
         {
-            _availableComPorts.AddRange(SerialPort.GetPortNames());
+            GetAvailableComPorts();
         }
+
+        public List<string> AvailableComPorts { get; set; }
 
         public void SendResetDrivesCommand()
         {
-            if (_port.IsOpen)
+            if (_port != null && _port.IsOpen)
             {
-                _port.Write(new byte[]{100, 0, 0}, 0, 3);
+                _port.Write(new byte[] {100, 0, 0}, 0, 3);
                 Thread.Sleep(500);
             }
         }
@@ -42,30 +43,19 @@ namespace ComOutput
 
         public void Disconnect()
         {
-            if (_port.IsOpen)
+            if (_port != null && _port.IsOpen)
                 _port.Close();
         }
 
         public void SendCommand(byte pin, int periodData)
         {
             var message = new[] { pin, (byte)((periodData >> 8) & 0xFF), (byte)(periodData & 0xFF) };
-
-            foreach (var batch in message.Batch(3))
-            {
-                System.Diagnostics.Trace.WriteLine(batch.Concatenate(" / "));
-            }
-
             _port.Write(message, 0, 3);
         }
 
         public void SendCommand(byte[] message)
         {
             _port.Write(message, 0, message.Length);
-
-            foreach (var batch in message.Batch(3))
-            {
-                System.Diagnostics.Trace.WriteLine(batch.Concatenate(" / "));
-            }
         }
 
         public void Dispose()
@@ -75,6 +65,18 @@ namespace ComOutput
                 _port.Dispose();
                 _port = null;
             }
+        }
+
+        public void SendStopCommand()
+        {
+            // ToDo: Send NoteOff command to all drives
+            SendResetDrivesCommand();
+        }
+
+        private void GetAvailableComPorts()
+        {
+            AvailableComPorts = new List<string>();
+            AvailableComPorts.AddRange(SerialPort.GetPortNames());
         }
     }
 }

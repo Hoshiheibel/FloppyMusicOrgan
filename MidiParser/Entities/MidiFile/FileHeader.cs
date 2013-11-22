@@ -1,8 +1,8 @@
 ﻿using MidiParser.Entities.Enums;
 
-namespace MidiParser.Entities
+namespace MidiParser.Entities.MidiFile
 {
-    public class MidiHeader
+    public class FileHeader
     {
         public string FileIdentifier { get; internal set; }
         public int HeaderLength { get; internal set; }

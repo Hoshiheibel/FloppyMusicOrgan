@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MidiParser.Entities.MidiEvents;
+using MidiParser.Entities.MidiFile;
 
 namespace MidiParser.Entities
 {
@@ -24,15 +25,21 @@ namespace MidiParser.Entities
         };
 
         private long _ticksPerSecond;
+        private long _currentAbsoluteDeltaPosition;
 
-        public ConvertedMidiTrack BuildTimeLine(IEnumerable<MidiTrack> tracks, long ticksPerSecond)
+        public ConvertedMidiTrack BuildTimeLine(IEnumerable<Track> tracks, long ticksPerSecond, int bpm)
         {
-            var convertedMidiTrack = new ConvertedMidiTrack();
+            var convertedMidiTrack = new ConvertedMidiTrack
+            {
+                BPM = bpm
+            };
+
             _ticksPerSecond = ticksPerSecond;
 
             foreach (var midiTrack in tracks)
             {
                 var currentTimePosition = new TimeSpan();
+                _currentAbsoluteDeltaPosition = 0;
 
                 foreach (var midiEvent in midiTrack.TrackEventChain)
                 {
@@ -41,20 +48,38 @@ namespace MidiParser.Entities
             }
 
             convertedMidiTrack.MessageList.Sort(new MessageListComparer());
+            RecalculateRelativeDeltaTimePositions(convertedMidiTrack);
             return convertedMidiTrack;
+        }
+
+        private void RecalculateRelativeDeltaTimePositions(ConvertedMidiTrack track)
+        {
+            ArduinoMessage lastMesssage = null;
+
+            foreach (var message in track.MessageList)
+            {
+                if (lastMesssage != null)
+                    message.RelativeTimePosition = message.AbsoluteDeltaTimePosition - lastMesssage.AbsoluteDeltaTimePosition;
+
+                lastMesssage = message;
+            }
         }
 
         private TimeSpan ParseAndAddMessage(BaseMidiChannelEvent midiEvent, ConvertedMidiTrack convertedMidiTrack, TimeSpan lastTime)
         {
             var timePosition = lastTime.Add(new TimeSpan(0, 0, 0, 0, (int)(midiEvent.DeltaTime * _ticksPerSecond / 100)));
+            _currentAbsoluteDeltaPosition += midiEvent.DeltaTime;
 
             if (midiEvent is NoteOnEvent)
             {
-                var message = convertedMidiTrack.MessageList.SingleOrDefault(m => m.AbsoluteTimePosition.Equals(timePosition));
+                var message = convertedMidiTrack.MessageList.SingleOrDefault(m => m.AbsoluteDeltaTimePosition.Equals(_currentAbsoluteDeltaPosition));
                 var period = MicroPeriods[((NoteOnEvent) midiEvent).Note] / (ArduinoResolution * 2);
 
                 if (message != null)
                 {
+                    if (message.ComMessage == null)
+                        message.ComMessage = new byte[0];
+
                     message.ComMessage = message.ComMessage.Concat(new[]
                     {
                         (byte) ((midiEvent.ChannelNumber + 1) * 2),
@@ -68,6 +93,7 @@ namespace MidiParser.Entities
                     convertedMidiTrack.MessageList.Add(new ArduinoMessage
                     {
                         AbsoluteTimePosition = timePosition,
+                        AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
                         RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         ComMessage = new[]
                         {
@@ -80,10 +106,13 @@ namespace MidiParser.Entities
             }
             else if (midiEvent is NoteOffEvent)
             {
-                var message = convertedMidiTrack.MessageList.SingleOrDefault(m => m.AbsoluteTimePosition.Equals(timePosition));
+                var message = convertedMidiTrack.MessageList.SingleOrDefault(m => m.AbsoluteDeltaTimePosition.Equals(_currentAbsoluteDeltaPosition));
 
                 if (message != null)
                 {
+                    if (message.ComMessage == null)
+                        message.ComMessage = new byte[0];
+
                     message.ComMessage = message.ComMessage.Concat(new[]
                     {
                         (byte) ((midiEvent.ChannelNumber + 1) * 2),
@@ -97,6 +126,7 @@ namespace MidiParser.Entities
                     convertedMidiTrack.MessageList.Add(new ArduinoMessage
                     {
                         AbsoluteTimePosition = timePosition,
+                        AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
                         RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         ComMessage = new[]
                         {
@@ -104,6 +134,28 @@ namespace MidiParser.Entities
                             (byte) 0,
                             (byte) 0
                         }
+                    });
+                }
+            }
+            else if (midiEvent is TempoChangeEvent)
+            {
+                var message =
+                    convertedMidiTrack.MessageList.SingleOrDefault(
+                        m => m.AbsoluteDeltaTimePosition.Equals(_currentAbsoluteDeltaPosition)
+                             && m is TempoChangeDummyMessage);
+
+                if (message != null)
+                {
+                    ((TempoChangeDummyMessage) message).BPM = ((TempoChangeEvent)midiEvent).BPM;
+                }
+                else
+                {
+                    convertedMidiTrack.MessageList.Add(new TempoChangeDummyMessage
+                    {
+                        AbsoluteTimePosition = timePosition,
+                        AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
+                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
+                        BPM = ((TempoChangeEvent)midiEvent).BPM
                     });
                 }
             }
