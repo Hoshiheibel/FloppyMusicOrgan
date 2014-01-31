@@ -58,21 +58,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Infrastructure\DelegateCommand.cs" />
-    <Compile Include="Infrastructure\PropertyChangedBase.cs" />
+    <Compile Include="Common\DelegateCommand.cs" />
+    <Compile Include="Common\IShow.cs" />
+    <Compile Include="Common\PropertyChangedBase.cs" />
+    <Compile Include="Common\Show.cs" />
     <Compile Include="ViewModels\FloppyMusicOrganViewModel.cs" />
-    <Page Include="FloppyMusicOrganDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
+    <Compile Include="Views\FloppyMusicOrganDialog.xaml.cs">
+      <DependentUpon>FloppyMusicOrganDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FloppyMusicOrganDialog.xaml.cs">
-      <DependentUpon>FloppyMusicOrganDialog.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
+    <Page Include="Views\FloppyMusicOrganDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using ComOutput;
 using FloppyMusicOrgan.Infrastructure;
+using MidiParser;
 using MidiParser.Entities.MidiFile;
 using MidiPlayer;
 
@@ -17,12 +18,14 @@ namespace FloppyMusicOrgan.ViewModels
             GetAvailableComPorts();
             PrepareMidiPlayer();
             ToggleButtons();
+            _show = new Show();
         }
 
         public bool IsConnectButtonEnabled { get; set; }
         public bool IsPlayButtonEnabled { get; set; }
         public bool IsResetDrivesButtonEnabled { get; set; }
         public bool IsComPortSelectionEnabled { get; set; }
+        public bool IsPauseButtonEnabled { get; set; }
         public string ConnectButtonCaption { get; set; }
         public string PlayButtonCaption { get; set; }
         public ObservableCollection<string> AvailableComPorts { get; set; }
@@ -32,7 +35,7 @@ namespace FloppyMusicOrgan.ViewModels
         public ICommand ResetDrivesCommand { get; set; }
         public ICommand ConnectCommand { get; set; }
         public ICommand LoadMidiFileCommand { get; set; }
-        public ICommand LoadMidiFileButtonEnabled { get; set; }
+        public ICommand PauseCommand { get; set; }
 
         private bool _isConnectedToComPort;
         private ComStreamer _comStreamer;
@@ -40,6 +43,9 @@ namespace FloppyMusicOrgan.ViewModels
         private MidiFile _midiFile;
         private Player _midiPlayer;
         private bool _isPlayingFile;
+        private IShow _show;
+        private Parser _parser;
+        private bool _isPaused;
 
         public void Quit()
         {
@@ -51,11 +57,18 @@ namespace FloppyMusicOrgan.ViewModels
 
         private void PrepareCommands()
         {
-            PlayCommand = new DelegateCommand(x => PlayFile());
+            PlayCommand = new DelegateCommand(x => TogglePlayFile());
             ResetDrivesCommand = new DelegateCommand(x => ResetDrives());
-            ConnectCommand = new DelegateCommand(x => ConnectToComPort());
+            ConnectCommand = new DelegateCommand(x => ToggleComPortConnection());
             LoadMidiFileCommand = new DelegateCommand(x => LoadFile());
-            LoadMidiFileButtonEnabled = new DelegateCommand(x => LoadFile());
+            PauseCommand = new DelegateCommand(x => PausePlayback());
+        }
+
+        private void PausePlayback()
+        {
+            _isPaused = true;
+            _midiPlayer.StopPlayback();
+            ToggleButtons();
         }
 
         private void PrepareButtons()
@@ -81,7 +94,7 @@ namespace FloppyMusicOrgan.ViewModels
             _midiPlayer = new Player(_comStreamer);
         }
 
-        private void ConnectToComPort()
+        private void ToggleComPortConnection()
         {
             if (!_isConnectedToComPort)
             {
@@ -98,25 +111,43 @@ namespace FloppyMusicOrgan.ViewModels
 
         private void ResetDrives()
         {
-            _comStreamer.SendResetDrivesCommand();
+            if (_comStreamer.IsConnected)
+                _comStreamer.SendResetDrivesCommand();
         }
 
-        private void PlayFile()
+        private void TogglePlayFile()
         {
-            ToggleButtons();
-
-            if (_isPlayingFile)
+            if (_isPlayingFile && !_isPaused)
+            {
                 _midiPlayer.StopPlayback();
-            else
+                _isPaused = false;
+                _isPlayingFile = false;
+            }
+            else if (!_isPaused)
+            {
                 _midiPlayer.Play(_midiFile);
+                _isPlayingFile = true;
+            }
+            else
+            {
+                _midiPlayer.ResumePlayback();
+                _isPaused = false;
+            }
 
-            _isPlayingFile = !_isPlayingFile;
+            ToggleButtons();
         }
 
         private void LoadFile()
         {
-            var midiParser = new MidiParser.MidiParser();
-            _midiFile = midiParser.Parse(@"E:\Floppy\_gp_v10.mid");
+            var fileName = _show.FileSelection();
+
+            if (string.IsNullOrEmpty(fileName))
+                return;
+
+            if (_parser == null)
+                _parser = new Parser();
+
+            _midiFile = _parser.Parse(fileName);
             _isFileLoaded = true;
             ToggleButtons();
         }
@@ -124,6 +155,7 @@ namespace FloppyMusicOrgan.ViewModels
         private void ToggleButtons()
         {
             IsPlayButtonEnabled = _isConnectedToComPort && _isFileLoaded;
+            IsPauseButtonEnabled = _isPlayingFile && !_isPaused;
             IsResetDrivesButtonEnabled = _isConnectedToComPort;
             IsConnectButtonEnabled = SelectedComPort != null;
             IsComPortSelectionEnabled = !_isConnectedToComPort;
@@ -132,7 +164,7 @@ namespace FloppyMusicOrgan.ViewModels
                 ? "Disconnect"
                 : "Connect";
 
-            PlayButtonCaption = _isPlayingFile
+            PlayButtonCaption = _isPlayingFile && !_isPaused
                 ? "Stop"
                 : "Play";
         }

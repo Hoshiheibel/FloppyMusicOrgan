@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading;
-using ComOutput;
+﻿using ComOutput;
 using MidiParser.Entities;
 using MidiParser.Entities.MidiFile;
 
@@ -14,48 +12,69 @@ namespace MidiPlayer
         private int _currentTrackPosition;
         private double _timeModificator;
         private int _timeDivision;
+        private bool _isStopped;
 
         public Player(ComStreamer comStreamer)
         {
             _comStreamer = comStreamer;
             _timer = new MicroTimer();
+            _timer.MicroTimerElapsed += MicroTimerOnElapsed;
+        }
+
+        ~Player()
+        {
+            _timer.MicroTimerElapsed -= MicroTimerOnElapsed;
+            _comStreamer.Dispose();
         }
 
         public void Play(MidiFile midiFile)
         {
+            _currentTrackPosition = 0;
             _timeDivision = midiFile.FileHeader.TimeDivision;
+            _isStopped = false;
             RecalculateBPM(midiFile.BPM);
 
-            _timer.MicroTimerElapsed += MicroTimerOnElapsed;
             _track = midiFile.ConvertedTrack;
-            DateTime.Now.Add(new TimeSpan(0, 0, 0, 1));
             _timer.Interval = 1000;
             _timer.Enabled = true;
             _timer.Start();
         }
 
+        public void StopPlayback()
+        {
+            _timer.Stop();
+            _isStopped = true;
+
+            if (_comStreamer.IsConnected)
+                _comStreamer.SendStopCommand();
+        }
+
+        public void ResumePlayback()
+        {
+            _timer.Start();
+            _isStopped = false;
+        }
+
         private void MicroTimerOnElapsed(object sender, MicroTimerEventArgs elapsedEventArgs)
         {
+            if (_isStopped)
+                return;
+
             if (_currentTrackPosition < _track.MessageList.Count)
             {
                 var message = _track.MessageList[_currentTrackPosition];
 
                 if (_track.MessageList.Count > _currentTrackPosition + 1)
-                {
-                    var nextMessage = _track.MessageList[_currentTrackPosition + 1];
-                    _timer.Interval = (long) ((double) nextMessage.RelativeTimePosition * _timeModificator * 1000 * 1000);
-                }
+                    CalculateNextTimerTick();
                 else
-                {
                     _timer.Interval = 100;
-                }
 
                 if (message is TempoChangeDummyMessage)
                 {
                     RecalculateBPM(((TempoChangeDummyMessage)message).BPM);
                     _currentTrackPosition++;
                 }
-                
+
                 if (message.ComMessage != null)
                 {
                     _comStreamer.SendCommand(message.ComMessage);
@@ -63,20 +82,19 @@ namespace MidiPlayer
                 }
             }
             else
-            {
-                _timer.Stop();
-            }
+                StopPlayback();
+        }
+
+        private void CalculateNextTimerTick()
+        {
+            var nextMessage = _track.MessageList[_currentTrackPosition + 1];
+            _timer.Interval = (long) ((double) nextMessage.RelativeTimePosition*_timeModificator*1000*1000);
         }
 
         private void RecalculateBPM(int bpm)
         {
             double secondsPerBeat = ((double)60D / (double)bpm);
             _timeModificator = secondsPerBeat / (double)_timeDivision;
-        }
-
-        public void StopPlayback()
-        {
-            _timer.Stop();
         }
     }
 }

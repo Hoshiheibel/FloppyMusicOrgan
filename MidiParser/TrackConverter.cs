@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MidiParser.Comparer;
+using MidiParser.Entities;
 using MidiParser.Entities.MidiEvents;
 using MidiParser.Entities.MidiFile;
 
-namespace MidiParser.Entities
+namespace MidiParser
 {
-    public class MidiTrackConverter
+    public class TrackConverter
     {
         private const int ArduinoResolution = 40;
+        private long _ticksPerSecond;
+        private long _currentAbsoluteDeltaPosition;
+
         private static readonly int[] MicroPeriods =
         {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -23,9 +28,6 @@ namespace MidiParser.Entities
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
-
-        private long _ticksPerSecond;
-        private long _currentAbsoluteDeltaPosition;
 
         public ConvertedMidiTrack BuildTimeLine(IEnumerable<Track> tracks, long ticksPerSecond, int bpm)
         {

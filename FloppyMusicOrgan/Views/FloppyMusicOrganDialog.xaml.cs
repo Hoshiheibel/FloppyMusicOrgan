@@ -1,15 +1,10 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Windows;
 using System.Windows.Controls;
 using ComOutput;
 using FloppyMusicOrgan.ViewModels;
-using MidiParser;
-using MidiParser.Entities;
 using MidiParser.Entities.MidiFile;
 
-namespace FloppyMusicOrgan
+namespace FloppyMusicOrgan.Views
 {
     public partial class FloppyMusicOrganDialog
     {

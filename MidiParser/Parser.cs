@@ -9,23 +9,20 @@ using MidiParser.Extensions;
 
 namespace MidiParser
 {
-    public class MidiParser
+    public class Parser
     {
         private const string MidiFileFormatIdentifier = "MThd";
         private const string MidiTrackChunkIdentifier = "MTrk";
 
         private MidiEventTypeEnum _currentEventType;
-        private readonly MidiFile _midiFile;
+        private MidiFile _midiFile;
         private BinaryReader _fileReader;
         private byte _lastStatus;
-        
-        public MidiParser()
-        {
-            _midiFile = new MidiFile();
-        }
 
         public MidiFile Parse(string fileName)
         {
+            _midiFile = new MidiFile();
+
             using (_fileReader = new BinaryReader(File.Open(fileName, FileMode.Open)))
             {
                 ReadHeaderChunk();
@@ -38,7 +35,7 @@ namespace MidiParser
 
         private void ConvertTracks()
         {
-            var midiTrackConverter = new MidiTrackConverter();
+            var midiTrackConverter = new TrackConverter();
 
             var convertedTrack = midiTrackConverter.BuildTimeLine(_midiFile.Tracks, _midiFile.FileHeader.TimeDivision, _midiFile.BPM);
             _midiFile.ConvertedTrack = convertedTrack;
@@ -274,7 +271,18 @@ namespace MidiParser
 
         private static void ParseNoteOffEvent(Stream stream, long deltaTime, int channelNumber, Track track)
         {
-            var noteEvent = new NoteOffEvent
+            track.TrackEventChain.Add(new NoteOffEvent
+            {
+                Note = stream.ReadByte(),
+                Velocity = stream.ReadByte(),
+                ChannelNumber = channelNumber,
+                DeltaTime = deltaTime
+            });
+        }
+
+        private static void ParseNoteOnEvent(Stream stream, long deltaTime, int channelNumber, Track track)
+        {
+            var noteEvent = new NoteOnEvent
             {
                 Note = stream.ReadByte(),
                 Velocity = stream.ReadByte(),
@@ -282,19 +290,20 @@ namespace MidiParser
                 DeltaTime = deltaTime
             };
 
-            if (noteEvent.Velocity != 0);
-                track.TrackEventChain.Add(noteEvent);
-        }
-
-        private static void ParseNoteOnEvent(Stream stream, long deltaTime, int channelNumber, Track track)
-        {
-            track.TrackEventChain.Add(new NoteOnEvent
+            if (noteEvent.Velocity != 0)
             {
-                Note = stream.ReadByte(),
-                Velocity = stream.ReadByte(),
-                ChannelNumber = channelNumber,
-                DeltaTime = deltaTime
-            });
+                track.TrackEventChain.Add(noteEvent);
+            }
+            else
+            {
+                track.TrackEventChain.Add(new NoteOffEvent
+                {
+                    ChannelNumber = noteEvent.ChannelNumber,
+                    DeltaTime = noteEvent.DeltaTime,
+                    Note = noteEvent.Note,
+                    Velocity = noteEvent.Velocity
+                });
+            }
         }
 
         private static void ParsePitchBendEvent(Stream stream, int channelNumber)
