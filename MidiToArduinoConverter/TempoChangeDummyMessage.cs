@@ -1,4 +1,4 @@
-﻿namespace MidiParser.Entities
+﻿namespace MidiToArduinoConverter
 {
     public class TempoChangeDummyMessage : ArduinoMessage
     {

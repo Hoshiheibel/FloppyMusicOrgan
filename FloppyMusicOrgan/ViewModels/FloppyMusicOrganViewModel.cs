@@ -5,6 +5,7 @@ using FloppyMusicOrgan.Infrastructure;
 using MidiParser;
 using MidiParser.Entities.MidiFile;
 using MidiPlayer;
+using MidiToArduinoConverter;
 
 namespace FloppyMusicOrgan.ViewModels
 {
@@ -125,7 +126,7 @@ namespace FloppyMusicOrgan.ViewModels
             }
             else if (!_isPaused)
             {
-                _midiPlayer.Play(_midiFile);
+                _midiPlayer.Play(new TrackConverter().Convert(_midiFile));
                 _isPlayingFile = true;
             }
             else

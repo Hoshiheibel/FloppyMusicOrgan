@@ -27,18 +27,9 @@ namespace MidiParser
             {
                 ReadHeaderChunk();
                 ReadTrackChunks();
-                ConvertTracks();
             }
 
             return _midiFile;
-        }
-
-        private void ConvertTracks()
-        {
-            var midiTrackConverter = new TrackConverter();
-
-            var convertedTrack = midiTrackConverter.BuildTimeLine(_midiFile.Tracks, _midiFile.FileHeader.TimeDivision, _midiFile.BPM);
-            _midiFile.ConvertedTrack = convertedTrack;
         }
 
         private static bool IsInvalidMidiFormatType(int fileType)

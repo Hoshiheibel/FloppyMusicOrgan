@@ -1,6 +1,7 @@
 ﻿using ComOutput;
 using MidiParser.Entities;
 using MidiParser.Entities.MidiFile;
+using MidiToArduinoConverter;
 
 namespace MidiPlayer
 {
@@ -27,14 +28,14 @@ namespace MidiPlayer
             _comStreamer.Dispose();
         }
 
-        public void Play(MidiFile midiFile)
+        public void Play(ConvertedMidiTrack convertedMidiFile)
         {
             _currentTrackPosition = 0;
-            _timeDivision = midiFile.FileHeader.TimeDivision;
+            _timeDivision = convertedMidiFile.MidiFile.FileHeader.TimeDivision;
             _isStopped = false;
-            RecalculateBPM(midiFile.BPM);
+            RecalculateBPM(convertedMidiFile.BPM);
 
-            _track = midiFile.ConvertedTrack;
+            _track = convertedMidiFile;
             _timer.Interval = 1000;
             _timer.Enabled = true;
             _timer.Start();

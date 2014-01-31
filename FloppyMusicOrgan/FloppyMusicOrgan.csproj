@@ -117,6 +117,10 @@
       <Project>{BB2495B5-778D-41DC-839B-DE1F86380498}</Project>
       <Name>MidiPlayer</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MidiToArduinoConverter\MidiToArduinoConverter.csproj">
+      <Project>{89694365-3F1A-4774-BD47-F1EB39EFCF55}</Project>
+      <Name>MidiToArduinoConverter</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />

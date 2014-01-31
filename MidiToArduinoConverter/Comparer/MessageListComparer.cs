@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using MidiParser.Entities;
 
-namespace MidiParser.Comparer
+namespace MidiToArduinoConverter.Comparer
 {
     public class MessageListComparer : IComparer<ArduinoMessage>
     {

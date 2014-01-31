@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MidiParser.Comparer;
-using MidiParser.Entities;
 using MidiParser.Entities.MidiEvents;
 using MidiParser.Entities.MidiFile;
+using MidiToArduinoConverter.Comparer;
 
-namespace MidiParser
+namespace MidiToArduinoConverter
 {
     public class TrackConverter
     {
@@ -29,7 +28,16 @@ namespace MidiParser
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
 
-        public ConvertedMidiTrack BuildTimeLine(IEnumerable<Track> tracks, long ticksPerSecond, int bpm)
+        public ConvertedMidiTrack Convert(MidiFile midiFile)
+        {
+            var midiTrackConverter = new TrackConverter();
+
+            var convertedTrack = midiTrackConverter.BuildTimeLine(midiFile.Tracks, midiFile.FileHeader.TimeDivision, midiFile.BPM);
+            convertedTrack.MidiFile = midiFile;
+            return convertedTrack;
+        }
+
+        private ConvertedMidiTrack BuildTimeLine(IEnumerable<Track> tracks, long ticksPerSecond, int bpm)
         {
             var convertedMidiTrack = new ConvertedMidiTrack
             {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MidiParser.Entities
+namespace MidiToArduinoConverter
 {
     public class ArduinoMessage
     {

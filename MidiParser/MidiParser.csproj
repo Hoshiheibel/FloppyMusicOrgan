@@ -40,10 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comparer\MessageListComparer.cs" />
-    <Compile Include="Entities\TempoChangeDummyMessage.cs" />
-    <Compile Include="Entities\ArduinoMessage.cs" />
-    <Compile Include="Entities\ConvertedMidiTrack.cs" />
     <Compile Include="Entities\MidiEvents\TempoChangeEvent.cs" />
     <Compile Include="Entities\MidiFile\FileHeader.cs" />
     <Compile Include="Entities\MidiFile\MidiFile.cs" />
@@ -61,7 +57,6 @@
     <Compile Include="Exceptions\InvalidMidiFormatTypeException.cs" />
     <Compile Include="Exceptions\InvalidChunkHeaderException.cs" />
     <Compile Include="Extensions\LinqExtensions.cs" />
-    <Compile Include="TrackConverter.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
