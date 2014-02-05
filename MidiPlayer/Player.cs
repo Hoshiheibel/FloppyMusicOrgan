@@ -11,8 +11,6 @@ namespace MidiPlayer
         private readonly MicroTimer _timer;
         private ConvertedMidiTrack _track;
         private int _currentTrackPosition;
-        private double _timeModificator;
-        private int _timeDivision;
         private bool _isStopped;
 
         public Player(ComStreamer comStreamer)
@@ -31,9 +29,7 @@ namespace MidiPlayer
         public void Play(ConvertedMidiTrack convertedMidiFile)
         {
             _currentTrackPosition = 0;
-            _timeDivision = convertedMidiFile.MidiFile.FileHeader.TimeDivision;
             _isStopped = false;
-            RecalculateBPM(convertedMidiFile.BPM);
 
             _track = convertedMidiFile;
             _timer.Interval = 1000;
@@ -64,23 +60,10 @@ namespace MidiPlayer
             if (_currentTrackPosition < _track.MessageList.Count)
             {
                 var message = _track.MessageList[_currentTrackPosition];
+                _timer.Interval = message.TimerIntervallToNextEvent;
 
-                if (_track.MessageList.Count > _currentTrackPosition + 1)
-                    CalculateNextTimerTick();
-                else
-                    _timer.Interval = 100;
-
-                if (message is TempoChangeDummyMessage)
-                {
-                    RecalculateBPM(((TempoChangeDummyMessage)message).BPM);
-                    _currentTrackPosition++;
-                }
-
-                if (message.ComMessage != null)
-                {
-                    _comStreamer.SendCommand(message.ComMessage);
-                    _currentTrackPosition++;
-                }
+                _comStreamer.SendCommand(message.ComMessage);
+                _currentTrackPosition++;
 
                 TimePositionChanged.Invoke(this, new TimePositionChangedEventArgs
                 {
@@ -90,18 +73,6 @@ namespace MidiPlayer
             }
             else
                 StopPlayback();
-        }
-
-        private void CalculateNextTimerTick()
-        {
-            var nextMessage = _track.MessageList[_currentTrackPosition + 1];
-            _timer.Interval = (long) ((double) nextMessage.RelativeTimePosition*_timeModificator*1000*1000);
-        }
-
-        private void RecalculateBPM(int bpm)
-        {
-            double secondsPerBeat = ((double)60D / (double)bpm);
-            _timeModificator = secondsPerBeat / (double)_timeDivision;
         }
     }
 }

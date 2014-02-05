@@ -12,6 +12,8 @@ namespace MidiToArduinoConverter
         private const int ArduinoResolution = 40;
         private long _ticksPerSecond;
         private long _currentAbsoluteDeltaPosition;
+        private double _timeModificator;
+        private int _timeDivision;
 
         private static readonly int[] MicroPeriods =
         {
@@ -30,9 +32,10 @@ namespace MidiToArduinoConverter
 
         public ConvertedMidiTrack Convert(MidiFile midiFile)
         {
-            var midiTrackConverter = new TrackConverter();
+            _timeDivision = midiFile.FileHeader.TimeDivision;
+            RecalculateBPM(midiFile.BPM);
 
-            var convertedTrack = midiTrackConverter.BuildTimeLine(midiFile.Tracks, midiFile.FileHeader.TimeDivision, midiFile.BPM);
+            var convertedTrack = BuildTimeLine(midiFile.Tracks, midiFile.FileHeader.TimeDivision, midiFile.BPM);
             convertedTrack.MidiFile = midiFile;
             return convertedTrack;
         }
@@ -58,18 +61,31 @@ namespace MidiToArduinoConverter
             }
 
             convertedMidiTrack.MessageList.Sort(new MessageListComparer());
-            RecalculateRelativeDeltaTimePositions(convertedMidiTrack);
+            RecalculateTimePositions(convertedMidiTrack);
             return convertedMidiTrack;
         }
 
-        private void RecalculateRelativeDeltaTimePositions(ConvertedMidiTrack track)
+        private void RecalculateTimePositions(ConvertedMidiTrack track)
         {
             ArduinoMessage lastMesssage = null;
 
             foreach (var message in track.MessageList)
             {
                 if (lastMesssage != null)
-                    message.RelativeTimePosition = message.AbsoluteDeltaTimePosition - lastMesssage.AbsoluteDeltaTimePosition;
+                {
+                    message.RelativeTimePosition = message.AbsoluteDeltaTimePosition -
+                                                   lastMesssage.AbsoluteDeltaTimePosition;
+
+                    lastMesssage.TimerIntervallToNextEvent = CalculateNextTimerTick(message.RelativeTimePosition);
+                    
+                    message.AbsoluteTimePosition =
+                        lastMesssage.AbsoluteTimePosition.Add(new TimeSpan(0, 0, 0, 0, ((int)lastMesssage.TimerIntervallToNextEvent / 1000)));
+                }
+
+                var tempoMessage = message as TempoChangeDummyMessage;
+
+                if (tempoMessage != null)
+                    RecalculateBPM(tempoMessage.BPM);
 
                 lastMesssage = message;
             }
@@ -189,6 +205,17 @@ namespace MidiToArduinoConverter
             }
 
             return timePosition;
+        }
+
+        private void RecalculateBPM(int bpm)
+        {
+            double secondsPerBeat = ((double)60D / (double)bpm);
+            _timeModificator = secondsPerBeat / _timeDivision;
+        }
+
+        private long CalculateNextTimerTick(long relativeTimePosition)
+        {
+            return (long)((double)relativeTimePosition * _timeModificator * 1000 * 1000);
         }
     }
 }
