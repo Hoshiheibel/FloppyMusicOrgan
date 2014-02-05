@@ -48,7 +48,7 @@
       <Name>MidiParser</Name>
     </ProjectReference>
     <ProjectReference Include="..\MidiToArduinoConverter\MidiToArduinoConverter.csproj">
-      <Project>{89694365-3F1A-4774-BD47-F1EB39EFCF55}</Project>
+      <Project>{89694365-3f1a-4774-bd47-f1eb39efcf55}</Project>
       <Name>MidiToArduinoConverter</Name>
     </ProjectReference>
   </ItemGroup>

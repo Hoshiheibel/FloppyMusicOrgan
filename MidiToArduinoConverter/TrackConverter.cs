@@ -154,9 +154,27 @@ namespace MidiToArduinoConverter
                         m => m.AbsoluteDeltaTimePosition.Equals(_currentAbsoluteDeltaPosition)
                              && m is TempoChangeDummyMessage);
 
+                var message2 =
+                    convertedMidiTrack.MessageList.SingleOrDefault(
+                        m => m.AbsoluteDeltaTimePosition.Equals(_currentAbsoluteDeltaPosition));
+
                 if (message != null)
                 {
                     ((TempoChangeDummyMessage) message).BPM = ((TempoChangeEvent)midiEvent).BPM;
+                }
+                else if (message2 != null)
+                {
+                    var newMessage = new TempoChangeDummyMessage
+                    {
+                        AbsoluteTimePosition = timePosition,
+                        AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
+                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
+                        BPM = ((TempoChangeEvent)midiEvent).BPM,
+                        ComMessage = message2.ComMessage
+                    };
+
+                    convertedMidiTrack.MessageList.Remove(message2);
+                    convertedMidiTrack.MessageList.Add(newMessage);
                 }
                 else
                 {

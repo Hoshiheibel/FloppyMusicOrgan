@@ -1,12 +1,12 @@
-﻿using ComOutput;
-using MidiParser.Entities;
-using MidiParser.Entities.MidiFile;
+﻿using System;
+using ComOutput;
 using MidiToArduinoConverter;
 
 namespace MidiPlayer
 {
     public class Player
     {
+        public EventHandler<TimePositionChangedEventArgs> TimePositionChanged; 
         private readonly ComStreamer _comStreamer;
         private readonly MicroTimer _timer;
         private ConvertedMidiTrack _track;
@@ -81,6 +81,12 @@ namespace MidiPlayer
                     _comStreamer.SendCommand(message.ComMessage);
                     _currentTrackPosition++;
                 }
+
+                TimePositionChanged.Invoke(this, new TimePositionChangedEventArgs
+                {
+                    NewDeltaTimePosition = message.AbsoluteDeltaTimePosition,
+                    NewTimePosition = message.AbsoluteTimePosition
+                });
             }
             else
                 StopPlayback();

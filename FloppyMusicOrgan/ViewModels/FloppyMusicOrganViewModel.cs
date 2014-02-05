@@ -20,6 +20,8 @@ namespace FloppyMusicOrgan.ViewModels
             PrepareMidiPlayer();
             ToggleButtons();
             _show = new Show();
+
+            LoadSettings();
         }
 
         public bool IsConnectButtonEnabled { get; set; }
@@ -31,6 +33,10 @@ namespace FloppyMusicOrgan.ViewModels
         public string PlayButtonCaption { get; set; }
         public ObservableCollection<string> AvailableComPorts { get; set; }
         public string SelectedComPort { get; set; }
+        public double MaximumSliderPosition { get; set; }
+        public double CurrentSliderPosition { get; set; }
+        public string CurrentTimePosition { get; set; }
+        public string TotalTime { get; set; }
 
         public ICommand PlayCommand { get; set; }
         public ICommand ResetDrivesCommand { get; set; }
@@ -38,22 +44,41 @@ namespace FloppyMusicOrgan.ViewModels
         public ICommand LoadMidiFileCommand { get; set; }
         public ICommand PauseCommand { get; set; }
 
+        private readonly IShow _show;
         private bool _isConnectedToComPort;
         private ComStreamer _comStreamer;
         private bool _isFileLoaded;
         private MidiFile _midiFile;
         private Player _midiPlayer;
         private bool _isPlayingFile;
-        private IShow _show;
         private Parser _parser;
         private bool _isPaused;
+        private ConvertedMidiTrack _convertedMidiFile;
 
         public void Quit()
         {
             _midiPlayer.StopPlayback();
+            
+            if (_midiPlayer.TimePositionChanged != null)
+                _midiPlayer.TimePositionChanged -= MidiPlayer_TimePositionChanged;
+            
             _comStreamer.SendStopCommand();
             _comStreamer.Disconnect();
             _comStreamer.Dispose();
+            _comStreamer = null;
+
+            SaveSettings();
+        }
+
+        private void SaveSettings()
+        {
+            Properties.Settings.Default["ComPort"] = SelectedComPort;
+            Properties.Settings.Default.Save();
+        }
+
+        private void LoadSettings()
+        {
+            SelectedComPort = Properties.Settings.Default["ComPort"].ToString();
         }
 
         private void PrepareCommands()
@@ -78,6 +103,11 @@ namespace FloppyMusicOrgan.ViewModels
             IsPlayButtonEnabled = false;
             ConnectButtonCaption = "Connect";
             PlayButtonCaption = "Play";
+
+            CurrentSliderPosition = 0;
+            MaximumSliderPosition = 100;
+            CurrentTimePosition = "00:00";
+            TotalTime = "00:00";
         }
 
         private void PrepareComStreamer()
@@ -93,6 +123,13 @@ namespace FloppyMusicOrgan.ViewModels
         private void PrepareMidiPlayer()
         {
             _midiPlayer = new Player(_comStreamer);
+            _midiPlayer.TimePositionChanged += MidiPlayer_TimePositionChanged;
+        }
+
+        private void MidiPlayer_TimePositionChanged(object sender, TimePositionChangedEventArgs timePositionChangedEventArgs)
+        {
+            CurrentSliderPosition = timePositionChangedEventArgs.NewDeltaTimePosition / 1000;
+            CurrentTimePosition = timePositionChangedEventArgs.NewTimePosition.ToString(@"mm\:ss");
         }
 
         private void ToggleComPortConnection()
@@ -126,7 +163,7 @@ namespace FloppyMusicOrgan.ViewModels
             }
             else if (!_isPaused)
             {
-                _midiPlayer.Play(new TrackConverter().Convert(_midiFile));
+                _midiPlayer.Play(_convertedMidiFile);
                 _isPlayingFile = true;
             }
             else
@@ -149,8 +186,21 @@ namespace FloppyMusicOrgan.ViewModels
                 _parser = new Parser();
 
             _midiFile = _parser.Parse(fileName);
+            _convertedMidiFile = new TrackConverter().Convert(_midiFile);
             _isFileLoaded = true;
             ToggleButtons();
+            SetupSliderForNewSong();
+        }
+
+        private void SetupSliderForNewSong()
+        {
+            CurrentTimePosition = "00:00";
+            TotalTime =
+                _convertedMidiFile.MessageList[_convertedMidiFile.MessageList.Count - 1].AbsoluteTimePosition.ToString(@"mm\:ss");
+
+            CurrentSliderPosition = 0;
+            MaximumSliderPosition =
+                _convertedMidiFile.MessageList[_convertedMidiFile.MessageList.Count - 1].AbsoluteDeltaTimePosition / 1000;
         }
 
         private void ToggleButtons()
