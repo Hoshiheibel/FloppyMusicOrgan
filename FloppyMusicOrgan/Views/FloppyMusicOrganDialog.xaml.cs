@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using ComOutput;
 using FloppyMusicOrgan.ViewModels;
 using MidiParser.Entities.MidiFile;

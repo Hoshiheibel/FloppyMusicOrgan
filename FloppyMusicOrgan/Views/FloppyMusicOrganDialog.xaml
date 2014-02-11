@@ -1,6 +1,7 @@
 ﻿<Window x:Class="FloppyMusicOrgan.Views.FloppyMusicOrganDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         Title="MainWindow" Height="350"
         Width="549"
         Closing="MainWindow_OnClosing">
@@ -93,7 +94,20 @@
                 Grid.Row="2"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Stretch"
-                Width="Auto" />
+                Width="Auto">
+            
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="PreviewMouseDown">
+                    <i:InvokeCommandAction Command="{Binding TimePositionSlider_MouseLeftButtonDown}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseUp">
+                    <i:InvokeCommandAction Command="{Binding TimePositionSlider_MouseLeftButtonUp}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="ValueChanged">
+                    <i:InvokeCommandAction Command="{Binding TimePositionSlider_ValueChanged}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Slider>
 
         <Label Grid.Column="1"
                HorizontalAlignment="Right"

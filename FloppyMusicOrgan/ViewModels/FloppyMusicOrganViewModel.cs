@@ -43,6 +43,9 @@ namespace FloppyMusicOrgan.ViewModels
         public ICommand ConnectCommand { get; set; }
         public ICommand LoadMidiFileCommand { get; set; }
         public ICommand PauseCommand { get; set; }
+        public ICommand TimePositionSlider_MouseLeftButtonDown { get; set; }
+        public ICommand TimePositionSlider_MouseLeftButtonUp { get; set; }
+        public ICommand TimePositionSlider_ValueChanged { get; set; }
 
         private readonly IShow _show;
         private bool _isConnectedToComPort;
@@ -54,6 +57,7 @@ namespace FloppyMusicOrgan.ViewModels
         private Parser _parser;
         private bool _isPaused;
         private ConvertedMidiTrack _convertedMidiFile;
+        private bool _allowUpdateSliderAutomatically;
 
         public void Quit()
         {
@@ -88,12 +92,31 @@ namespace FloppyMusicOrgan.ViewModels
             ConnectCommand = new DelegateCommand(x => ToggleComPortConnection());
             LoadMidiFileCommand = new DelegateCommand(x => LoadFile());
             PauseCommand = new DelegateCommand(x => PausePlayback());
+            TimePositionSlider_MouseLeftButtonDown = new DelegateCommand(x => OnTimePositionSlider_MouseLeftButtonDown());
+            TimePositionSlider_MouseLeftButtonUp = new DelegateCommand(x => OnTimePositionSlider_MouseLeftButtonUp());
+            TimePositionSlider_ValueChanged = new DelegateCommand(x => OnTimePositionSlider_ValueChanged());
+        }
+
+        private void OnTimePositionSlider_ValueChanged()
+        {
+            if (!_allowUpdateSliderAutomatically)
+                _midiPlayer.GoToSelectedSongPosition(CurrentSliderPosition * 1000);
+        }
+
+        private void OnTimePositionSlider_MouseLeftButtonUp()
+        {
+            _allowUpdateSliderAutomatically = true;
+        }
+
+        private void OnTimePositionSlider_MouseLeftButtonDown()
+        {
+            _allowUpdateSliderAutomatically = false;
         }
 
         private void PausePlayback()
         {
             _isPaused = true;
-            _midiPlayer.StopPlayback();
+            _midiPlayer.PausePlayback();
             ToggleButtons();
         }
 
@@ -108,6 +131,8 @@ namespace FloppyMusicOrgan.ViewModels
             MaximumSliderPosition = 100;
             CurrentTimePosition = "00:00";
             TotalTime = "00:00";
+
+            _allowUpdateSliderAutomatically = true;
         }
 
         private void PrepareComStreamer()
@@ -128,6 +153,9 @@ namespace FloppyMusicOrgan.ViewModels
 
         private void MidiPlayer_TimePositionChanged(object sender, TimePositionChangedEventArgs timePositionChangedEventArgs)
         {
+            if (!_allowUpdateSliderAutomatically)
+                return;
+
             CurrentSliderPosition = timePositionChangedEventArgs.NewDeltaTimePosition / 1000;
             CurrentTimePosition = timePositionChangedEventArgs.NewTimePosition.ToString(@"mm\:ss");
         }

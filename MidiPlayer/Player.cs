@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ComOutput;
 using MidiToArduinoConverter;
 
@@ -41,6 +42,13 @@ namespace MidiPlayer
         {
             _timer.Stop();
             _isStopped = true;
+            _currentTrackPosition = 0;
+
+            TimePositionChanged.Invoke(this, new TimePositionChangedEventArgs
+            {
+                NewDeltaTimePosition = 0,
+                NewTimePosition = new TimeSpan(0)
+            });
 
             if (_comStreamer.IsConnected)
                 _comStreamer.SendStopCommand();
@@ -62,7 +70,9 @@ namespace MidiPlayer
                 var message = _track.MessageList[_currentTrackPosition];
                 _timer.Interval = message.TimerIntervallToNextEvent;
 
-                _comStreamer.SendCommand(message.ComMessage);
+                if (message.ComMessage != null)
+                    _comStreamer.SendCommand(message.ComMessage);
+
                 _currentTrackPosition++;
 
                 TimePositionChanged.Invoke(this, new TimePositionChangedEventArgs
@@ -73,6 +83,28 @@ namespace MidiPlayer
             }
             else
                 StopPlayback();
+        }
+
+        public void GoToSelectedSongPosition(double deltaTimePosition)
+        {
+            var minDistance = _track.MessageList.Min(n => Math.Abs(deltaTimePosition - n.AbsoluteDeltaTimePosition));
+            var closest = _track.MessageList.First(n => Math.Abs(deltaTimePosition - n.AbsoluteDeltaTimePosition) == minDistance);
+
+            //System.Diagnostics.Trace.WriteLine("DeltaTime: " + deltaTimePosition);
+            //System.Diagnostics.Trace.WriteLine("DeltaPosition = " + closest.AbsoluteDeltaTimePosition);
+            //System.Diagnostics.Trace.WriteLine("ListIndex = " + _track.MessageList.IndexOf(closest));
+
+            _comStreamer.SendStopCommand();
+            _currentTrackPosition = _track.MessageList.IndexOf(closest);
+        }
+
+        public void PausePlayback()
+        {
+            _timer.Stop();
+            _isStopped = true;
+
+            if (_comStreamer.IsConnected)
+                _comStreamer.SendStopCommand();
         }
     }
 }

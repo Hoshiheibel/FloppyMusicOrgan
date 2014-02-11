@@ -93,7 +93,7 @@ namespace ComOutput
             {
                 message.ComMessage = message.ComMessage.Concat(new[]
                     {
-                        (byte) ((i + 1) * 2),
+                        (byte) (i + 1),
                         (byte) 0,
                         (byte) 0
                     })

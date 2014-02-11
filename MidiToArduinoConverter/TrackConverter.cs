@@ -12,8 +12,8 @@ namespace MidiToArduinoConverter
         private const int ArduinoResolution = 40;
         private long _ticksPerSecond;
         private long _currentAbsoluteDeltaPosition;
-        private double _timeModificator;
-        private int _timeDivision;
+        private double _currentTimeModificator;
+        private int _currentTimeDivision;
 
         private static readonly int[] MicroPeriods =
         {
@@ -32,7 +32,7 @@ namespace MidiToArduinoConverter
 
         public ConvertedMidiTrack Convert(MidiFile midiFile)
         {
-            _timeDivision = midiFile.FileHeader.TimeDivision;
+            _currentTimeDivision = midiFile.FileHeader.TimeDivision;
             RecalculateBPM(midiFile.BPM);
 
             var convertedTrack = BuildTimeLine(midiFile.Tracks, midiFile.FileHeader.TimeDivision, midiFile.BPM);
@@ -108,7 +108,7 @@ namespace MidiToArduinoConverter
 
                     message.ComMessage = message.ComMessage.Concat(new[]
                     {
-                        (byte) ((midiEvent.ChannelNumber + 1) * 2),
+                        (byte) (midiEvent.ChannelNumber + 1),
                         (byte) ((period >> 8) & 0xFF),
                         (byte) (period & 0xFF)
                     })
@@ -123,7 +123,7 @@ namespace MidiToArduinoConverter
                         RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         ComMessage = new[]
                         {
-                            (byte) ((midiEvent.ChannelNumber + 1) * 2),
+                            (byte) (midiEvent.ChannelNumber + 1),
                             (byte) ((period >> 8) & 0xFF),
                             (byte) (period & 0xFF)
                         }
@@ -141,7 +141,7 @@ namespace MidiToArduinoConverter
 
                     message.ComMessage = message.ComMessage.Concat(new[]
                     {
-                        (byte) ((midiEvent.ChannelNumber + 1) * 2),
+                        (byte) (midiEvent.ChannelNumber + 1),
                         (byte) 0,
                         (byte) 0
                     })
@@ -156,7 +156,7 @@ namespace MidiToArduinoConverter
                         RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         ComMessage = new[]
                         {
-                            (byte) ((midiEvent.ChannelNumber + 1) * 2),
+                            (byte) (midiEvent.ChannelNumber + 1),
                             (byte) 0,
                             (byte) 0
                         }
@@ -210,12 +210,12 @@ namespace MidiToArduinoConverter
         private void RecalculateBPM(int bpm)
         {
             double secondsPerBeat = ((double)60D / (double)bpm);
-            _timeModificator = secondsPerBeat / _timeDivision;
+            _currentTimeModificator = secondsPerBeat / _currentTimeDivision;
         }
 
         private long CalculateNextTimerTick(long relativeTimePosition)
         {
-            return (long)((double)relativeTimePosition * _timeModificator * 1000 * 1000);
+            return (long)((double)relativeTimePosition * _currentTimeModificator * 1000 * 1000);
         }
     }
 }
