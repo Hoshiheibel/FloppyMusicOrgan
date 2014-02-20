@@ -45,7 +45,6 @@
     <Compile Include="ArduinoMessage.cs" />
     <Compile Include="Comparer\MessageListComparer.cs" />
     <Compile Include="ConvertedMidiTrack.cs" />
-    <Compile Include="MidiToArduinoConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TempoChangeDummyMessage.cs" />
     <Compile Include="TrackConverter.cs" />

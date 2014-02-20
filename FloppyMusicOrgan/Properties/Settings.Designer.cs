@@ -26,12 +26,12 @@ namespace FloppyMusicOrgan.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ComPort {
+        public string MusicComPort {
             get {
-                return ((string)(this["ComPort"]));
+                return ((string)(this["MusicComPort"]));
             }
             set {
-                this["ComPort"] = value;
+                this["MusicComPort"] = value;
             }
         }
     }

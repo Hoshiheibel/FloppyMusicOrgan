@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows.Input;
 using ComOutput;
 using FloppyMusicOrgan.Infrastructure;
@@ -11,6 +13,8 @@ namespace FloppyMusicOrgan.ViewModels
 {
     class FloppyMusicOrganViewModel : PropertyChangedBase
     {
+        private const string _fileNamePrefix = "File: ";
+
         public FloppyMusicOrganViewModel()
         {
             PrepareCommands();
@@ -20,6 +24,7 @@ namespace FloppyMusicOrgan.ViewModels
             PrepareMidiPlayer();
             ToggleButtons();
             _show = new Show();
+            CurrentFileName = _fileNamePrefix;
 
             LoadSettings();
         }
@@ -32,11 +37,12 @@ namespace FloppyMusicOrgan.ViewModels
         public string ConnectButtonCaption { get; set; }
         public string PlayButtonCaption { get; set; }
         public ObservableCollection<string> AvailableComPorts { get; set; }
-        public string SelectedComPort { get; set; }
+        public string SelectedMusicComPort { get; set; }
         public double MaximumSliderPosition { get; set; }
         public double CurrentSliderPosition { get; set; }
         public string CurrentTimePosition { get; set; }
         public string TotalTime { get; set; }
+        public string CurrentFileName { get; set; }
 
         public ICommand PlayCommand { get; set; }
         public ICommand ResetDrivesCommand { get; set; }
@@ -65,7 +71,7 @@ namespace FloppyMusicOrgan.ViewModels
             
             if (_midiPlayer.TimePositionChanged != null)
                 _midiPlayer.TimePositionChanged -= MidiPlayer_TimePositionChanged;
-            
+
             _comStreamer.SendStopCommand();
             _comStreamer.Disconnect();
             _comStreamer.Dispose();
@@ -76,13 +82,13 @@ namespace FloppyMusicOrgan.ViewModels
 
         private void SaveSettings()
         {
-            Properties.Settings.Default["ComPort"] = SelectedComPort;
+            Properties.Settings.Default["MusicComPort"] = SelectedMusicComPort;
             Properties.Settings.Default.Save();
         }
 
         private void LoadSettings()
         {
-            SelectedComPort = Properties.Settings.Default["ComPort"].ToString();
+            SelectedMusicComPort = Properties.Settings.Default["MusicComPort"].ToString();
         }
 
         private void PrepareCommands()
@@ -149,6 +155,12 @@ namespace FloppyMusicOrgan.ViewModels
         {
             _midiPlayer = new Player(_comStreamer);
             _midiPlayer.TimePositionChanged += MidiPlayer_TimePositionChanged;
+            _midiPlayer.PlaybackFinished += PlaybackFinished;
+        }
+
+        private void PlaybackFinished(object sender, EventArgs eventArgs)
+        {
+            TogglePlayFile();
         }
 
         private void MidiPlayer_TimePositionChanged(object sender, TimePositionChangedEventArgs timePositionChangedEventArgs)
@@ -164,7 +176,7 @@ namespace FloppyMusicOrgan.ViewModels
         {
             if (!_isConnectedToComPort)
             {
-                _isConnectedToComPort = _comStreamer.Connect(SelectedComPort);
+                _isConnectedToComPort = _comStreamer.Connect(SelectedMusicComPort);
                 ToggleButtons();
             }
             else
@@ -218,6 +230,9 @@ namespace FloppyMusicOrgan.ViewModels
             _isFileLoaded = true;
             ToggleButtons();
             SetupSliderForNewSong();
+
+            var fileInfo = new FileInfo(fileName);
+            CurrentFileName = _fileNamePrefix + fileInfo.Name;
         }
 
         private void SetupSliderForNewSong()
@@ -236,7 +251,7 @@ namespace FloppyMusicOrgan.ViewModels
             IsPlayButtonEnabled = _isConnectedToComPort && _isFileLoaded;
             IsPauseButtonEnabled = _isPlayingFile && !_isPaused;
             IsResetDrivesButtonEnabled = _isConnectedToComPort;
-            IsConnectButtonEnabled = SelectedComPort != null;
+            IsConnectButtonEnabled = SelectedMusicComPort != null;
             IsComPortSelectionEnabled = !_isConnectedToComPort;
             
             ConnectButtonCaption = _isConnectedToComPort
@@ -248,7 +263,7 @@ namespace FloppyMusicOrgan.ViewModels
                 : "Play";
         }
         
-        public void SelectedComPortChanged()
+        public void SelectedComPortForMusicOutputChanged()
         {
             ToggleButtons();
         }

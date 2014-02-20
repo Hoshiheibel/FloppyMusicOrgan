@@ -11,6 +11,7 @@
             <RowDefinition Height="27"></RowDefinition>
             <RowDefinition Height="27"></RowDefinition>
             <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
             <RowDefinition Height="27*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -23,17 +24,22 @@
         </Grid.ColumnDefinitions>
         
         <ComboBox ItemsSource="{Binding AvailableComPorts}"
-                  SelectedItem="{Binding SelectedComPort}"
+                  SelectedItem="{Binding SelectedMusicComPort}"
                   IsEnabled="{Binding IsComPortSelectionEnabled}"
-                  SelectionChanged="ComPort_OnSelectionChanged"
+                  SelectionChanged="ComPortMusicOutput_OnSelectionChanged"
                   Grid.Row="0"
                   Grid.Column="1"
                   Width="150"
                   Height="22"
                   VerticalAlignment="Top"
                   HorizontalAlignment="Left"
-                  Margin="0,3,0,0"/>
+                  Margin="0,3,0,0" />
         
+        <Label Content="{Binding CurrentFileName}"
+               Width="Auto"
+               Grid.Row="1"
+               Grid.Column="1"/>
+
         <Button Command="{Binding LoadMidiFileCommand}"
                 Content="Load File"
                 HorizontalAlignment="Left"
@@ -52,7 +58,7 @@
                 VerticalAlignment="Bottom"
                 Margin="0,0,0,3"
                 Grid.Column="1"
-                Grid.Row="4"
+                Grid.Row="5"
                 Height="22" />
         
         <Button IsEnabled="{Binding IsResetDrivesButtonEnabled}"
@@ -63,7 +69,7 @@
                 VerticalAlignment="Bottom"
                 Margin="90,0,0,3"
                 Grid.Column="1"
-                Grid.Row="4"
+                Grid.Row="5"
                 Height="22" />
         
         <Button IsEnabled="{Binding IsPauseButtonEnabled}"
@@ -74,14 +80,14 @@
                 VerticalAlignment="Bottom"
                 Margin="190,0,0,3"
                 Grid.Column="1"
-                Grid.Row="4"
+                Grid.Row="5"
                 Height="22" />
 
         <Label Grid.Column="1"
                HorizontalAlignment="Left"
                Margin="0,0,0,0"
                Content="{Binding CurrentTimePosition}"
-               Grid.Row="2"
+               Grid.Row="3"
                VerticalAlignment="Top"
                Width="Auto" />
 
@@ -91,7 +97,7 @@
                 Maximum="{Binding MaximumSliderPosition}"
                 Value="{Binding CurrentSliderPosition}"
                 Margin="40,0,40,0"
-                Grid.Row="2"
+                Grid.Row="3"
                 VerticalAlignment="Top"
                 HorizontalContentAlignment="Stretch"
                 Width="Auto">
@@ -113,7 +119,7 @@
                HorizontalAlignment="Right"
                Margin="0,0,0,0"
                Content="{Binding TotalTime, FallbackValue=00:00}"
-               Grid.Row="2"
+               Grid.Row="3"
                VerticalAlignment="Top"
                Width="Auto" />
 
@@ -125,12 +131,12 @@
                 VerticalAlignment="Bottom"
                 Margin="260,0,0,3"
                 Grid.Column="1"
-                Grid.Row="4"
+                Grid.Row="5"
                 Height="22" />
         
         <GridSplitter Grid.Column="2"
                       Grid.Row="0"
                       HorizontalAlignment="Stretch"
-                      Grid.RowSpan="5" />
+                      Grid.RowSpan="6" />
     </Grid>
 </Window>

@@ -8,7 +8,8 @@ namespace MidiPlayer
     public class Player
     {
         public EventHandler<TimePositionChangedEventArgs> TimePositionChanged; 
-        private readonly ComStreamer _comStreamer;
+        public EventHandler<EventArgs> PlaybackFinished; 
+        private readonly ComStreamer _comStreamerMusic;
         private readonly MicroTimer _timer;
         private ConvertedMidiTrack _track;
         private int _currentTrackPosition;
@@ -16,7 +17,7 @@ namespace MidiPlayer
 
         public Player(ComStreamer comStreamer)
         {
-            _comStreamer = comStreamer;
+            _comStreamerMusic = comStreamer;
             _timer = new MicroTimer();
             _timer.MicroTimerElapsed += MicroTimerOnElapsed;
         }
@@ -24,7 +25,7 @@ namespace MidiPlayer
         ~Player()
         {
             _timer.MicroTimerElapsed -= MicroTimerOnElapsed;
-            _comStreamer.Dispose();
+            _comStreamerMusic.Dispose();
         }
 
         public void Play(ConvertedMidiTrack convertedMidiFile)
@@ -50,8 +51,8 @@ namespace MidiPlayer
                 NewTimePosition = new TimeSpan(0)
             });
 
-            if (_comStreamer.IsConnected)
-                _comStreamer.SendStopCommand();
+            if (_comStreamerMusic.IsConnected)
+                _comStreamerMusic.SendStopCommand();
         }
 
         public void ResumePlayback()
@@ -71,7 +72,9 @@ namespace MidiPlayer
                 _timer.Interval = message.TimerIntervallToNextEvent;
 
                 if (message.ComMessage != null)
-                    _comStreamer.SendCommand(message.ComMessage);
+                {
+                    _comStreamerMusic.SendCommand(message.ComMessage);
+                }
 
                 _currentTrackPosition++;
 
@@ -82,7 +85,12 @@ namespace MidiPlayer
                 });
             }
             else
+            {
                 StopPlayback();
+
+                if (PlaybackFinished != null)
+                    PlaybackFinished.Invoke(this, new EventArgs());
+            }
         }
 
         public void GoToSelectedSongPosition(double deltaTimePosition)
@@ -90,11 +98,7 @@ namespace MidiPlayer
             var minDistance = _track.MessageList.Min(n => Math.Abs(deltaTimePosition - n.AbsoluteDeltaTimePosition));
             var closest = _track.MessageList.First(n => Math.Abs(deltaTimePosition - n.AbsoluteDeltaTimePosition) == minDistance);
 
-            //System.Diagnostics.Trace.WriteLine("DeltaTime: " + deltaTimePosition);
-            //System.Diagnostics.Trace.WriteLine("DeltaPosition = " + closest.AbsoluteDeltaTimePosition);
-            //System.Diagnostics.Trace.WriteLine("ListIndex = " + _track.MessageList.IndexOf(closest));
-
-            _comStreamer.SendStopCommand();
+            _comStreamerMusic.SendStopCommand();
             _currentTrackPosition = _track.MessageList.IndexOf(closest);
         }
 
@@ -103,8 +107,8 @@ namespace MidiPlayer
             _timer.Stop();
             _isStopped = true;
 
-            if (_comStreamer.IsConnected)
-                _comStreamer.SendStopCommand();
+            if (_comStreamerMusic.IsConnected)
+                _comStreamerMusic.SendStopCommand();
         }
     }
 }

@@ -1,19 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
-using ComOutput;
 using FloppyMusicOrgan.ViewModels;
-using MidiParser.Entities.MidiFile;
 
 namespace FloppyMusicOrgan.Views
 {
     public partial class FloppyMusicOrganDialog
     {
-        private MidiFile _midiFile;
-        private readonly ComStreamer _comStreamer;
-        private bool _isConnectedToComPort;
-        private FloppyMusicOrganViewModel _floppyMusicOrganViewModel;
+        private readonly FloppyMusicOrganViewModel _floppyMusicOrganViewModel;
 
         public FloppyMusicOrganDialog()
         {
@@ -27,9 +20,9 @@ namespace FloppyMusicOrgan.Views
             _floppyMusicOrganViewModel.Quit();
         }
 
-        private void ComPort_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ComPortMusicOutput_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _floppyMusicOrganViewModel.SelectedComPortChanged();
+            _floppyMusicOrganViewModel.SelectedComPortForMusicOutputChanged();
         }
     }
 }
