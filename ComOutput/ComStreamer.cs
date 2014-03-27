@@ -43,7 +43,7 @@ namespace ComOutput
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debugger.Break();
+                System.Diagnostics.Trace.WriteLine(ex.Message);
                 return false;
             }
 
