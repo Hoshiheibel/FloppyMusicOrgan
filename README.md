@@ -38,4 +38,4 @@ Handles conversion of the parsed midi files to a custom format which is sent to 
 
 # Architecture Diagram
 
-[![architecture diagram](ArchitectureGraph_For_Floppy_Music_Organ.png?raw=true)]
+![architecture diagram](ArchitectureGraph_For_Floppy_Music_Organ.png?raw=true)
