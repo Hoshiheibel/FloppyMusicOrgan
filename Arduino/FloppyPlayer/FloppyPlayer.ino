@@ -100,26 +100,26 @@ void tick()
     {
       if(currentPosition[1] >= MAXIMUM_POSITION)
       {
-        sbi(porta, 1);
-        sbi(portadirection, 1);
+        sbi(porta, 0);
+        sbi(portadirection, 0);
       }
       else if(currentPosition[1] <= MINIMUM_POSITION)
       {
-        cbi(porta, 1);
-        cbi(portadirection, 1);
+        cbi(porta, 0);
+        cbi(portadirection, 0);
       }
 
       //Update currentPosition
-      if(ebi(porta, 1))
+      if(ebi(porta, 0))
         currentPosition[1]--;
       else
         currentPosition[1]++;
 
       //Pulse the step pin
-      if(ebi(porta, 0))
-        cbi(porta, 0);
+      if(ebi(porta, 1))
+        cbi(porta, 1);
       else
-        sbi(porta, 0);
+        sbi(porta, 1);
 
       currentTick[1]=0;
     }
@@ -165,25 +165,25 @@ void tick()
     {
       if(currentPosition[3] >= MAXIMUM_POSITION)
       {
-        sbi(porta, 5);
-        sbi(portadirection, 5);
+        sbi(porta, 4);
+        sbi(portadirection, 4);
       }
       else if(currentPosition[3] <= MINIMUM_POSITION)
       {
-        cbi(porta, 5);
-        cbi(portadirection, 5);
+        cbi(porta, 4);
+        cbi(portadirection, 4);
       }
       //Update currentPosition
-      if(ebi(porta, 5))
+      if(ebi(porta, 4))
         currentPosition[3]--;
       else
         currentPosition[3]++;
 
       //Pulse the step pin
-      if(ebi(porta, 4))
-        cbi(porta, 4);
+      if(ebi(porta, 5))
+        cbi(porta, 5);
       else
-        sbi(porta, 4);
+        sbi(porta, 5);
 
       currentTick[3] = 0;
     }
@@ -197,25 +197,25 @@ void tick()
     {
       if(currentPosition[4] >= MAXIMUM_POSITION)
       {
-        sbi(porta, 7);
-        sbi(portadirection, 7);
+        sbi(porta, 6);
+        sbi(portadirection, 6);
       }
       else if(currentPosition[4] <= MINIMUM_POSITION)
       {
-        cbi(porta, 7);
-        cbi(portadirection, 7);
+        cbi(porta, 6);
+        cbi(portadirection, 6);
       }
       //Update currentPosition
-      if(ebi(porta, 7))
+      if(ebi(porta, 6))
         currentPosition[4]--;
       else
         currentPosition[4]++;
 
       //Pulse the step pin
-      if(ebi(porta, 6))
-        cbi(porta, 6);
+      if(ebi(porta, 7))
+        cbi(porta, 7);
       else
-        sbi(porta, 6);
+        sbi(porta, 7);
 
       currentTick[4] = 0;
     }
@@ -628,7 +628,7 @@ void resetAll(){
   cli();
   
   //Set all pins to reverse direction
-  PORTA = B10101010;
+  PORTA = B01011001;
   PORTC = B10101010;
   PORTF = B10101010;
   PORTL = B10101010;
@@ -642,7 +642,7 @@ void resetAll(){
     PORTL = B11111111;
     delay(100);
 
-    PORTA = B10101010;
+    PORTA = B01011001;
     PORTC = B10101010;
     PORTF = B10101010;
     PORTL = B10101010;
