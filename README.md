@@ -46,3 +46,8 @@ In order to build this project you only need to install the Visual Studio Extens
 ## Architecture Diagram
 
 ![architecture diagram](ArchitectureGraph_For_Floppy_Music_Organ.png?raw=true)
+
+
+## How it works
+
+--- Coming soon ---
