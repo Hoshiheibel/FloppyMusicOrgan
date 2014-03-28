@@ -43,11 +43,6 @@ Handles conversion of the parsed midi files to a custom format which is sent to 
 In order to build this project you only need to install the Visual Studio Extension "NuGet Package Manager". Once you build the project for the first time, all external dependencies should be downloaded automatically.
 
 
-## Architecture Diagram
-
-![architecture diagram](ArchitectureGraph_For_Floppy_Music_Organ.png?raw=true)
-
-
 ## How it works
 
 --- Coming soon ---
