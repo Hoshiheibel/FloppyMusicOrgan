@@ -117,15 +117,15 @@
       <Project>{E78B89A6-A28B-4ED1-A259-56AA8BC4CCF5}</Project>
       <Name>ComOutput</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MidiParser\MidiParser.csproj">
+    <ProjectReference Include="..\..\MidiParser\MidiParser.csproj">
       <Project>{03B3CE6C-C4F7-4531-A13B-DF1FC02554A0}</Project>
       <Name>MidiParser</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MidiPlayer\MidiPlayer.csproj">
+    <ProjectReference Include="..\..\MidiPlayer\MidiPlayer.csproj">
       <Project>{BB2495B5-778D-41DC-839B-DE1F86380498}</Project>
       <Name>MidiPlayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MidiToArduinoConverter\MidiToArduinoConverter.csproj">
+    <ProjectReference Include="..\..\MidiToArduinoConverter\MidiToArduinoConverter.csproj">
       <Project>{89694365-3f1a-4774-bd47-f1eb39efcf55}</Project>
       <Name>MidiToArduinoConverter</Name>
     </ProjectReference>

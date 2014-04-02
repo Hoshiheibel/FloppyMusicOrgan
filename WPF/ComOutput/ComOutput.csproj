@@ -43,11 +43,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MidiParser\MidiParser.csproj">
+    <ProjectReference Include="..\..\MidiParser\MidiParser.csproj">
       <Project>{03B3CE6C-C4F7-4531-A13B-DF1FC02554A0}</Project>
       <Name>MidiParser</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MidiToArduinoConverter\MidiToArduinoConverter.csproj">
+    <ProjectReference Include="..\..\MidiToArduinoConverter\MidiToArduinoConverter.csproj">
       <Project>{89694365-3f1a-4774-bd47-f1eb39efcf55}</Project>
       <Name>MidiToArduinoConverter</Name>
     </ProjectReference>

@@ -45,7 +45,7 @@
     <Compile Include="TimePositionChangedEventArgs.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ComOutput\ComOutput.csproj">
+    <ProjectReference Include="..\WPF\ComOutput\ComOutput.csproj">
       <Project>{E78B89A6-A28B-4ED1-A259-56AA8BC4CCF5}</Project>
       <Name>ComOutput</Name>
     </ProjectReference>

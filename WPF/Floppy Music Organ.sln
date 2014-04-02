@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiParser", "MidiParser\MidiParser.csproj", "{03B3CE6C-C4F7-4531-A13B-DF1FC02554A0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiParser", "..\MidiParser\MidiParser.csproj", "{03B3CE6C-C4F7-4531-A13B-DF1FC02554A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComOutput", "ComOutput\ComOutput.csproj", "{E78B89A6-A28B-4ED1-A259-56AA8BC4CCF5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FloppyMusicOrgan", "FloppyMusicOrgan\FloppyMusicOrgan.csproj", "{E2F0887D-E456-40E2-9DCC-8467CE10420C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiPlayer", "MidiPlayer\MidiPlayer.csproj", "{BB2495B5-778D-41DC-839B-DE1F86380498}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiPlayer", "..\MidiPlayer\MidiPlayer.csproj", "{BB2495B5-778D-41DC-839B-DE1F86380498}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiToArduinoConverter", "MidiToArduinoConverter\MidiToArduinoConverter.csproj", "{89694365-3F1A-4774-BD47-F1EB39EFCF55}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiToArduinoConverter", "..\MidiToArduinoConverter\MidiToArduinoConverter.csproj", "{89694365-3F1A-4774-BD47-F1EB39EFCF55}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3462DF75-7E00-4641-8597-858294A42016}"
 	ProjectSection(SolutionItems) = preProject
