@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Input;
@@ -39,7 +40,7 @@ namespace FloppyMusicOrgan.ViewModels
         public string ConnectButtonCaption { get; set; }
         public string PlayButtonCaption { get; set; }
         public ObservableCollection<string> AvailableComPorts { get; set; }
-        public ObservableCollection<TuningFrequencyEnum> AvailableTuningFrequencies { get; set; } 
+        public IList<TuningFrequencyEnum> AvailableTuningFrequencies { get; set; } 
         public string SelectedMusicComPort { get; set; }
         public TuningFrequencyEnum SelectedTuningFrequency { get; set; }
         public double MaximumSliderPosition { get; set; }
