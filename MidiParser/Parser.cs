@@ -85,7 +85,7 @@ namespace MidiParser
         {
             // ToDo: parse FramesPerSecond correctly, only works for TicksPerBeat at the moment
             var timeDivision = _fileReader.ReadBytes(2);
-            _midiFile.TimeDivisionType = (TimeDivisionType) (timeDivision[0] & 0x80);
+            _midiFile.TimeDivisionType = (TimeDivisionTypeEnum) (timeDivision[0] & 0x80);
             _midiFile.FileHeader.TimeDivision = timeDivision.ConvertToInt();
         }
 

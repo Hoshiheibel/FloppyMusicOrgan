@@ -39,6 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MicroStopwatch.cs" />
+    <Compile Include="MicroTimerEventArgs.cs" />
     <Compile Include="MicroTimimngLib.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

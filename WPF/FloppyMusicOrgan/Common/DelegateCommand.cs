@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace FloppyMusicOrgan.Infrastructure
+namespace FloppyMusicOrgan.Common
 {
     public class DelegateCommand : ICommand
     {
@@ -19,9 +19,7 @@ namespace FloppyMusicOrgan.Infrastructure
         public bool CanExecute(object parameter)
         {
             if (_canExecute == null)
-            {
                 return true;
-            }
 
             return _canExecute(parameter);
         }
@@ -29,14 +27,6 @@ namespace FloppyMusicOrgan.Infrastructure
         public void Execute(object parameter)
         {
             _execute(parameter);
-        }
-
-        public void RaiseCanExecuteChanged()
-        {
-            if (CanExecuteChanged != null)
-            {
-                CanExecuteChanged(this, EventArgs.Empty);
-            }
         }
     }
 }

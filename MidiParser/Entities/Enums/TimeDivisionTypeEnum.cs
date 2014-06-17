@@ -1,6 +1,6 @@
 ﻿namespace MidiParser.Entities.Enums
 {
-    public enum TimeDivisionType
+    public enum TimeDivisionTypeEnum
     {
         TicksPerBeat = 0,
         FramesPerSecond = 1

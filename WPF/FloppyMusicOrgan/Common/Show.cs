@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 
-namespace FloppyMusicOrgan.Infrastructure
+namespace FloppyMusicOrgan.Common
 {
     public class Show : IShow
     {
@@ -17,9 +17,10 @@ namespace FloppyMusicOrgan.Infrastructure
 
             var dialogResult = dialog.ShowDialog();
 
-            return dialogResult.Value
-                ? dialog.FileName
-                : string.Empty;
+            return
+                dialogResult != null && dialogResult.Value
+                    ? dialog.FileName
+                    : string.Empty;
         }
     }
 }

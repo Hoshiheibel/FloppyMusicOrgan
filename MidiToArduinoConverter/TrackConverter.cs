@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MidiParser.Entities.Enums;
 using MidiParser.Entities.MidiEvents;
 using MidiParser.Entities.MidiFile;
 using MidiToArduinoConverter.Comparer;
@@ -14,8 +15,10 @@ namespace MidiToArduinoConverter
         private long _currentAbsoluteDeltaPosition;
         private double _currentTimeModificator;
         private int _currentTimeDivision;
+        private readonly int[] _periods;
 
-        private static readonly int[] MicroPeriods =
+        // 440Hz Tuning
+        private static readonly int[] MicroPeriods440Hz =
         {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -29,6 +32,40 @@ namespace MidiToArduinoConverter
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
+
+        // 432Hz Tuning
+        private static readonly int[] MicroPeriods432Hz =
+        {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            31143, 29394, 27747, 26192, 24722, 23332, 22022, 20786, 19619, 18519, 17479, 16498, //C1 - B1
+            15571, 14697, 13873, 13094, 12359, 11666, 11011, 10393, 9810, 9259, 8740, 8249, //C2 - B2
+            7786, 7349, 6937, 6547, 6180, 5833, 5506, 5197, 4905, 4630, 4370, 4125, //C3 - B3
+            3893, 3675, 3468, 3274, 3090, 2916, 2753, 2598, 2452, 2315, 2185, 2062, //C4 - B4
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        };
+
+        public TrackConverter(TuningFrequencyEnum tuningFrequency = TuningFrequencyEnum.Frequency440Hz)
+        {
+            switch (tuningFrequency)
+            {
+                case TuningFrequencyEnum.Frequency432Hz:
+                    _periods = MicroPeriods432Hz;
+                    break;
+
+                case TuningFrequencyEnum.Frequency440Hz:
+                    _periods = MicroPeriods440Hz;
+                    break;
+
+                default:
+                    _periods = MicroPeriods440Hz;
+                    break;
+            }
+        }
 
         public ConvertedMidiTrack Convert(MidiFile midiFile)
         {
@@ -99,7 +136,7 @@ namespace MidiToArduinoConverter
             if (midiEvent is NoteOnEvent)
             {
                 var message = convertedMidiTrack.MessageList.SingleOrDefault(m => m.AbsoluteDeltaTimePosition.Equals(_currentAbsoluteDeltaPosition));
-                var period = MicroPeriods[((NoteOnEvent) midiEvent).Note] / (ArduinoResolution * 2);
+                var period = _periods[((NoteOnEvent) midiEvent).Note] / (ArduinoResolution * 2);
 
                 if (message != null)
                 {
@@ -209,13 +246,13 @@ namespace MidiToArduinoConverter
 
         private void RecalculateBPM(int bpm)
         {
-            double secondsPerBeat = ((double)60D / (double)bpm);
+            double secondsPerBeat = (60D / bpm);
             _currentTimeModificator = secondsPerBeat / _currentTimeDivision;
         }
 
         private long CalculateNextTimerTick(long relativeTimePosition)
         {
-            return (long)((double)relativeTimePosition * _currentTimeModificator * 1000 * 1000);
+            return (long)(relativeTimePosition * _currentTimeModificator * 1000 * 1000);
         }
     }
 }

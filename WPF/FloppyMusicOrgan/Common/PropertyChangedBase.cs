@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Linq.Expressions;
 
-namespace FloppyMusicOrgan.Infrastructure
+namespace FloppyMusicOrgan.Common
 {
     public class PropertyChangedBase : INotifyPropertyChanged
     {

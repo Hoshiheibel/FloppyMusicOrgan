@@ -8,7 +8,7 @@ namespace MidiToArduinoConverter.Comparer
         {
             if (x.AbsoluteDeltaTimePosition < y.AbsoluteDeltaTimePosition)
                 return -1;
-            else if (x.AbsoluteDeltaTimePosition > y.AbsoluteDeltaTimePosition)
+            if (x.AbsoluteDeltaTimePosition > y.AbsoluteDeltaTimePosition)
                 return 1;
 
             return 0;

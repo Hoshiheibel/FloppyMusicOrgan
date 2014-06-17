@@ -16,7 +16,7 @@ namespace ComOutput
             GetAvailableComPorts();
         }
 
-        public List<string> AvailableComPorts { get; set; }
+        public List<string> AvailableComPorts { get; private set; }
 
         public bool IsConnected
         {
@@ -41,9 +41,8 @@ namespace ComOutput
 
                 _port.Open();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                System.Diagnostics.Trace.WriteLine(ex.Message);
                 return false;
             }
 
@@ -57,12 +56,6 @@ namespace ComOutput
 
             Dispose();
         }
-
-        ////public void SendCommand(byte pin, int periodData)
-        ////{
-        ////    var message = new[] { pin, (byte)((periodData >> 8) & 0xFF), (byte)(periodData & 0xFF) };
-        ////    _port.Write(message, 0, 3);
-        ////}
 
         public void SendCommand(byte[] message)
         {

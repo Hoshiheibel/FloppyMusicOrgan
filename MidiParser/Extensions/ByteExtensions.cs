@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace MidiParser.Extensions
@@ -12,14 +11,6 @@ namespace MidiParser.Extensions
             return enc.GetString(bytes);
         }
 
-        public static IEnumerable<int> ConvertByteListToIntList(this IEnumerable<byte> bytes)
-        {
-            foreach (var b in bytes)
-            {
-                yield return BitConverter.ToInt16(new[] {(byte)0, b}, 0);
-            }
-        }
-
         public static int ConvertToInt(this byte[] bytes)
         {
             Array.Reverse(bytes);
@@ -30,11 +21,6 @@ namespace MidiParser.Extensions
 
             // ToDo: Need to check more cases?
             return -1;
-        }
-
-        public static long ConvertToLong(this byte[] bytes)
-        {
-            return BitConverter.ToInt64(bytes, 0);
         }
 
         public static byte GetFirstNibble(this byte value)

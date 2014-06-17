@@ -3,8 +3,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Input;
 using ComOutput;
-using FloppyMusicOrgan.Infrastructure;
+using FloppyMusicOrgan.Common;
 using MidiParser;
+using MidiParser.Entities.Enums;
 using MidiParser.Entities.MidiFile;
 using MidiPlayer;
 using MidiToArduinoConverter;
@@ -21,6 +22,7 @@ namespace FloppyMusicOrgan.ViewModels
             PrepareButtons();
             PrepareComStreamer();
             GetAvailableComPorts();
+            PopulateTuningFrequencyCombobox();
             PrepareMidiPlayer();
             ToggleButtons();
             _show = new Show();
@@ -37,7 +39,9 @@ namespace FloppyMusicOrgan.ViewModels
         public string ConnectButtonCaption { get; set; }
         public string PlayButtonCaption { get; set; }
         public ObservableCollection<string> AvailableComPorts { get; set; }
+        public ObservableCollection<TuningFrequencyEnum> AvailableTuningFrequencies { get; set; } 
         public string SelectedMusicComPort { get; set; }
+        public TuningFrequencyEnum SelectedTuningFrequency { get; set; }
         public double MaximumSliderPosition { get; set; }
         public double CurrentSliderPosition { get; set; }
         public string CurrentTimePosition { get; set; }
@@ -126,6 +130,15 @@ namespace FloppyMusicOrgan.ViewModels
             ToggleButtons();
         }
 
+        private void PopulateTuningFrequencyCombobox()
+        {
+            AvailableTuningFrequencies = new ObservableCollection<TuningFrequencyEnum>();
+            AvailableTuningFrequencies.Add(TuningFrequencyEnum.Frequency432Hz);
+            AvailableTuningFrequencies.Add(TuningFrequencyEnum.Frequency440Hz);
+
+            SelectedTuningFrequency = TuningFrequencyEnum.Frequency432Hz;
+        }
+
         private void PrepareButtons()
         {
             IsConnectButtonEnabled = true;
@@ -168,7 +181,7 @@ namespace FloppyMusicOrgan.ViewModels
             if (!_allowUpdateSliderAutomatically)
                 return;
 
-            CurrentSliderPosition = timePositionChangedEventArgs.NewDeltaTimePosition / 1000;
+            CurrentSliderPosition = timePositionChangedEventArgs.NewDeltaTimePosition / 1000d;
             CurrentTimePosition = timePositionChangedEventArgs.NewTimePosition.ToString(@"mm\:ss");
         }
 
@@ -226,7 +239,7 @@ namespace FloppyMusicOrgan.ViewModels
                 _parser = new Parser();
 
             _midiFile = _parser.Parse(fileName);
-            _convertedMidiFile = new TrackConverter().Convert(_midiFile);
+            _convertedMidiFile = new TrackConverter(SelectedTuningFrequency).Convert(_midiFile);
             _isFileLoaded = true;
             ToggleButtons();
             SetupSliderForNewSong();
@@ -243,7 +256,7 @@ namespace FloppyMusicOrgan.ViewModels
 
             CurrentSliderPosition = 0;
             MaximumSliderPosition =
-                _convertedMidiFile.MessageList[_convertedMidiFile.MessageList.Count - 1].AbsoluteDeltaTimePosition / 1000;
+                _convertedMidiFile.MessageList[_convertedMidiFile.MessageList.Count - 1].AbsoluteDeltaTimePosition / 1000d;
         }
 
         private void ToggleButtons()

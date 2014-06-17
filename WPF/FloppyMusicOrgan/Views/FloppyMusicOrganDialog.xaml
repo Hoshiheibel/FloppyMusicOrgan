@@ -37,6 +37,16 @@
                   HorizontalAlignment="Left"
                   Margin="0,3,0,0" />
 
+        <ComboBox ItemsSource="{Binding AvailableTuningFrequencies}"
+                  SelectedItem="{Binding SelectedTuningFrequency, Mode=TwoWay}"
+                  Grid.Row="0"
+                  Grid.Column="1"
+                  Width="150"
+                  Height="22"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Left"
+                  Margin="160,3,0,0" />
+
         <Label Content="{Binding CurrentFileName}"
                Width="Auto"
                Grid.Row="1"
@@ -46,7 +56,7 @@
                 Content="Load File"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Margin="257,3,0,0"
+                Margin="320,3,0,0"
                 Grid.Column="1"
                 Grid.Row="0"
                 Height="22"

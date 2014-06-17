@@ -1,4 +1,4 @@
-﻿namespace FloppyMusicOrgan.Infrastructure
+﻿namespace FloppyMusicOrgan.Common
 {
     interface IShow
     {

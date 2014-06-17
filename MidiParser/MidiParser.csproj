@@ -40,12 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Enums\TuningFrequencyEnum.cs" />
     <Compile Include="Entities\MidiEvents\TempoChangeEvent.cs" />
     <Compile Include="Entities\MidiFile\FileHeader.cs" />
     <Compile Include="Entities\MidiFile\MidiFile.cs" />
     <Compile Include="Entities\MidiFile\Track.cs" />
     <Compile Include="Entities\MidiFile\TrackHeader.cs" />
-    <Compile Include="Entities\Enums\TimeDivisionType.cs" />
+    <Compile Include="Entities\Enums\TimeDivisionTypeEnum.cs" />
     <Compile Include="Entities\Enums\MidiEventTypeEnum.cs" />
     <Compile Include="Entities\MidiEvents\BaseMidiChannelEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOffEvent.cs" />
@@ -56,7 +57,6 @@
     <Compile Include="Extensions\ByteExtensions.cs" />
     <Compile Include="Exceptions\InvalidMidiFormatTypeException.cs" />
     <Compile Include="Exceptions\InvalidChunkHeaderException.cs" />
-    <Compile Include="Extensions\LinqExtensions.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
