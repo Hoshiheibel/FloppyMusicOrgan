@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MidiPlayer
+namespace MidiPlayer.Events
 {
     public class TimePositionChangedEventArgs : EventArgs
     {

@@ -5,7 +5,7 @@
         xmlns:views="clr-namespace:FloppyMusicOrgan.Views"
         Title="FloppyMusicOrgan"
         Height="421"
-        Width="817"
+        Width="791"
         Closing="MainWindow_OnClosing">
     <Grid>
         <Grid.RowDefinitions>
@@ -14,6 +14,7 @@
             <RowDefinition Height="27"></RowDefinition>
             <RowDefinition Height="27"></RowDefinition>
             <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
             <RowDefinition Height="27*"></RowDefinition>
         </Grid.RowDefinitions>
 
@@ -23,6 +24,7 @@
                               MinWidth="320" />
             <ColumnDefinition Width="5" />
             <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <ComboBox ItemsSource="{Binding AvailableComPorts}"
@@ -70,7 +72,7 @@
                 VerticalAlignment="Bottom"
                 Margin="0,0,0,3"
                 Grid.Column="1"
-                Grid.Row="5"
+                Grid.Row="6"
                 Height="22" />
 
         <Button IsEnabled="{Binding IsResetDrivesButtonEnabled}"
@@ -81,7 +83,7 @@
                 VerticalAlignment="Bottom"
                 Margin="90,0,0,3"
                 Grid.Column="1"
-                Grid.Row="5"
+                Grid.Row="6"
                 Height="22" />
 
         <Button IsEnabled="{Binding IsPauseButtonEnabled}"
@@ -92,7 +94,7 @@
                 VerticalAlignment="Bottom"
                 Margin="190,0,0,3"
                 Grid.Column="1"
-                Grid.Row="5"
+                Grid.Row="6"
                 Height="22" />
 
         <Label Grid.Column="1"
@@ -143,12 +145,16 @@
                 VerticalAlignment="Bottom"
                 Margin="260,0,0,3"
                 Grid.Column="1"
-                Grid.Row="5"
+                Grid.Row="6"
                 Height="22" />
 
         <GridSplitter Grid.Column="2"
                       Grid.Row="0"
                       HorizontalAlignment="Stretch"
-                      Grid.RowSpan="6" />
+                      Grid.RowSpan="7" />
+        <views:EqualizerView Grid.Column="3"
+                             Grid.Row="0"
+                             Grid.RowSpan="6"
+                             DataContext="{Binding EqualizerViewModel}" />
     </Grid>
 </Window>

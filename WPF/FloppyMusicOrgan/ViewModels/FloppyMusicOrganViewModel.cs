@@ -9,6 +9,7 @@ using MidiParser;
 using MidiParser.Entities.Enums;
 using MidiParser.Entities.MidiFile;
 using MidiPlayer;
+using MidiPlayer.Events;
 using MidiToArduinoConverter;
 
 namespace FloppyMusicOrgan.ViewModels
@@ -19,6 +20,7 @@ namespace FloppyMusicOrgan.ViewModels
 
         public FloppyMusicOrganViewModel()
         {
+            InitSubControls();
             PrepareCommands();
             PrepareButtons();
             PrepareComStreamer();
@@ -32,6 +34,12 @@ namespace FloppyMusicOrgan.ViewModels
             LoadSettings();
         }
 
+        private void InitSubControls()
+        {
+            EqualizerViewModel = new EqualizerViewModel();
+        }
+
+        public EqualizerViewModel EqualizerViewModel { get; set; }
         public bool IsConnectButtonEnabled { get; set; }
         public bool IsPlayButtonEnabled { get; set; }
         public bool IsResetDrivesButtonEnabled { get; set; }
@@ -170,6 +178,12 @@ namespace FloppyMusicOrgan.ViewModels
             _midiPlayer = new Player(_comStreamer);
             _midiPlayer.TimePositionChanged += MidiPlayer_TimePositionChanged;
             _midiPlayer.PlaybackFinished += PlaybackFinished;
+            _midiPlayer.ComDataSent += ComDataSent;
+        }
+
+        private void ComDataSent(object sender, ComDataSentEventArgs comDataSentEventArgs)
+        {
+            EqualizerViewModel.SetCurrentNoteValues(comDataSentEventArgs.Messages);
         }
 
         private void PlaybackFinished(object sender, EventArgs eventArgs)

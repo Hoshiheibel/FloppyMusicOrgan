@@ -70,7 +70,12 @@
     <Compile Include="Common\IShow.cs" />
     <Compile Include="Common\PropertyChangedBase.cs" />
     <Compile Include="Common\Show.cs" />
+    <Compile Include="ViewModels\EqualizerBarViewModel.cs" />
+    <Compile Include="ViewModels\EqualizerViewModel.cs" />
     <Compile Include="ViewModels\FloppyMusicOrganViewModel.cs" />
+    <Compile Include="Views\EqualizerView.xaml.cs">
+      <DependentUpon>EqualizerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FloppyMusicOrganDialog.xaml.cs">
       <DependentUpon>FloppyMusicOrganDialog.xaml</DependentUpon>
     </Compile>
@@ -78,6 +83,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\EqualizerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\FloppyMusicOrganDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -150,6 +150,8 @@ namespace MidiToArduinoConverter
                         (byte) (period & 0xFF)
                     })
                     .ToArray();
+
+                    message.OriginalMidiEvents.Add(midiEvent);
                 }
                 else
                 {
@@ -157,12 +159,16 @@ namespace MidiToArduinoConverter
                     {
                         AbsoluteTimePosition = timePosition,
                         AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
-                        RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
+                        RelativeTimePosition = midiEvent.DeltaTime*_ticksPerSecond,
                         ComMessage = new[]
                         {
                             (byte) (midiEvent.ChannelNumber + 1),
                             (byte) ((period >> 8) & 0xFF),
                             (byte) (period & 0xFF)
+                        },
+                        OriginalMidiEvents = new List<BaseMidiChannelEvent>
+                        {
+                            midiEvent
                         }
                     });
                 }
@@ -183,6 +189,8 @@ namespace MidiToArduinoConverter
                         (byte) 0
                     })
                     .ToArray();
+
+                    message.OriginalMidiEvents.Add(midiEvent);
                 }
                 else
                 {
@@ -196,6 +204,10 @@ namespace MidiToArduinoConverter
                             (byte) (midiEvent.ChannelNumber + 1),
                             (byte) 0,
                             (byte) 0
+                        },
+                        OriginalMidiEvents = new List<BaseMidiChannelEvent>
+                        {
+                            midiEvent
                         }
                     });
                 }
@@ -236,7 +248,11 @@ namespace MidiToArduinoConverter
                         AbsoluteTimePosition = timePosition,
                         AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
                         RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
-                        BPM = ((TempoChangeEvent)midiEvent).BPM
+                        BPM = ((TempoChangeEvent)midiEvent).BPM,
+                        OriginalMidiEvents = new List<BaseMidiChannelEvent>
+                        {
+                            midiEvent
+                        }
                     });
                 }
             }

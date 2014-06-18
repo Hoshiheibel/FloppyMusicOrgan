@@ -1,11 +1,9 @@
-using System;
-
 //
 // High performance timing, taken from "http://www.codeproject.com/Articles/98346/Microsecond-and-Millisecond-NET-Timer"
 //
-namespace MidiPlayer
+namespace MidiPlayer.Events
 {
-    public class MicroTimerEventArgs : EventArgs
+    public class MicroTimerEventArgs : System.EventArgs
     {
         // Simple counter, number times timed event (callback function) executed
         public int TimerCount { get; private set; }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using MidiParser.Entities.MidiEvents;
 
 namespace MidiToArduinoConverter
 {
@@ -9,5 +11,6 @@ namespace MidiToArduinoConverter
         public byte[] ComMessage { get; set; }
         public long AbsoluteDeltaTimePosition { get; set; }
         public long RelativeTimePosition { get; set; }
+        public List<BaseMidiChannelEvent> OriginalMidiEvents { get; set; }
     }
 }

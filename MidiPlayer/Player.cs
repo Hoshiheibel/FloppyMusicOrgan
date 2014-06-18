@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ComOutput;
+using MidiPlayer.Events;
 using MidiToArduinoConverter;
 
 namespace MidiPlayer
@@ -8,7 +9,8 @@ namespace MidiPlayer
     public class Player
     {
         public EventHandler<TimePositionChangedEventArgs> TimePositionChanged; 
-        public EventHandler<EventArgs> PlaybackFinished; 
+        public EventHandler<EventArgs> PlaybackFinished;
+        public EventHandler<ComDataSentEventArgs> ComDataSent; 
         private readonly ComStreamer _comStreamerMusic;
         private readonly MicroTimer _timer;
         private ConvertedMidiTrack _track;
@@ -74,6 +76,10 @@ namespace MidiPlayer
                 if (message.ComMessage != null)
                 {
                     _comStreamerMusic.SendCommand(message.ComMessage);
+                    ComDataSent.Invoke(this, new ComDataSentEventArgs
+                    {
+                        Messages = message.OriginalMidiEvents
+                    });
                 }
 
                 _currentTrackPosition++;

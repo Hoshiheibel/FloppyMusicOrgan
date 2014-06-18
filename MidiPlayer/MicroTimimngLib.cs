@@ -1,6 +1,9 @@
 ﻿//
 // High performance timing, taken from "http://www.codeproject.com/Articles/98346/Microsecond-and-Millisecond-NET-Timer"
 //
+
+using MidiPlayer.Events;
+
 namespace MidiPlayer
 {
     public class MicroTimer
