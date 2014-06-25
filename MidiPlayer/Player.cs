@@ -10,7 +10,8 @@ namespace MidiPlayer
     {
         public EventHandler<TimePositionChangedEventArgs> TimePositionChanged; 
         public EventHandler<EventArgs> PlaybackFinished;
-        public EventHandler<ComDataSentEventArgs> ComDataSent; 
+        public EventHandler<ComDataSentEventArgs> ComDataSent;
+        public EventHandler<EventArgs> PlaybackHalted;
         private readonly ComStreamer _comStreamerMusic;
         private readonly MicroTimer _timer;
         private ConvertedMidiTrack _track;
@@ -47,6 +48,9 @@ namespace MidiPlayer
             _isStopped = true;
             _currentTrackPosition = 0;
 
+            if (PlaybackHalted != null)
+                PlaybackHalted.Invoke(this, EventArgs.Empty);
+
             TimePositionChanged.Invoke(this, new TimePositionChangedEventArgs
             {
                 NewDeltaTimePosition = 0,
@@ -75,7 +79,7 @@ namespace MidiPlayer
 
                 if (message.ComMessage != null)
                 {
-                    _comStreamerMusic.SendCommand(message.ComMessage);
+                    //_comStreamerMusic.SendCommand(message.ComMessage);
                     ComDataSent.Invoke(this, new ComDataSentEventArgs
                     {
                         Messages = message.OriginalMidiEvents
@@ -112,6 +116,9 @@ namespace MidiPlayer
         {
             _timer.Stop();
             _isStopped = true;
+
+            if (PlaybackHalted != null)
+                PlaybackHalted.Invoke(this, EventArgs.Empty);
 
             if (_comStreamerMusic.IsConnected)
                 _comStreamerMusic.SendStopCommand();

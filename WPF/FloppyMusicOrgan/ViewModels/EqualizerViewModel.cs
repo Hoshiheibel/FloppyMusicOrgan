@@ -36,5 +36,13 @@ namespace FloppyMusicOrgan.ViewModels
                     Bars[noteOffMessage.ChannelNumber].Value = 0;
             }
         }
+
+        public void ResetBars()
+        {
+            foreach (var equalizerBarViewModel in Bars)
+            {
+                equalizerBarViewModel.Value = 0;
+            }
+        }
     }
 }

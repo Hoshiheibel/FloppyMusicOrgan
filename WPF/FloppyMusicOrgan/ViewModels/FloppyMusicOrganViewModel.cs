@@ -179,6 +179,12 @@ namespace FloppyMusicOrgan.ViewModels
             _midiPlayer.TimePositionChanged += MidiPlayer_TimePositionChanged;
             _midiPlayer.PlaybackFinished += PlaybackFinished;
             _midiPlayer.ComDataSent += ComDataSent;
+            _midiPlayer.PlaybackHalted += PlaybackHalted;
+        }
+
+        private void PlaybackHalted(object sender, EventArgs eventArgs)
+        {
+            EqualizerViewModel.ResetBars();
         }
 
         private void ComDataSent(object sender, ComDataSentEventArgs comDataSentEventArgs)
