@@ -79,7 +79,7 @@ namespace MidiPlayer
 
                 if (message.ComMessage != null)
                 {
-                    //_comStreamerMusic.SendCommand(message.ComMessage);
+                    _comStreamerMusic.SendCommand(message.ComMessage);
                     ComDataSent.Invoke(this, new ComDataSentEventArgs
                     {
                         Messages = message.OriginalMidiEvents
