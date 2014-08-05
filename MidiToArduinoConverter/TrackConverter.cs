@@ -132,6 +132,8 @@ namespace MidiToArduinoConverter
             }
         }
 
+        // ToDo: Split into several methods
+        // Separate parse from add
         private TimeSpan ParseAndAddMessage(BaseMidiChannelEvent midiEvent, ConvertedMidiTrack convertedMidiTrack, TimeSpan lastTime)
         {
             var timePosition = lastTime.Add(new TimeSpan(0, 0, 0, 0, (int)(midiEvent.DeltaTime * _ticksPerSecond / 100)));

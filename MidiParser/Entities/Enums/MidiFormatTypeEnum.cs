@@ -4,6 +4,6 @@
     {
         SingleTrack = 0,
         MultipleTrackSynchronously = 1,
-        MultipleTracksAsynchonously = 2
+        MultipleTracksAsynchronously = 2
     }
 }

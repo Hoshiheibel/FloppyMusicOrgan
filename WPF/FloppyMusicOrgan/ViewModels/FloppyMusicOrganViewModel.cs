@@ -96,12 +96,18 @@ namespace FloppyMusicOrgan.ViewModels
         private void SaveSettings()
         {
             Properties.Settings.Default["MusicComPort"] = SelectedMusicComPort;
+            Properties.Settings.Default["TuningFrequency"] = (int)SelectedTuningFrequency;
             Properties.Settings.Default.Save();
         }
 
         private void LoadSettings()
         {
             SelectedMusicComPort = Properties.Settings.Default["MusicComPort"].ToString();
+
+            int frequency;
+
+            if (int.TryParse(Properties.Settings.Default["TuningFrequency"].ToString(), out frequency))
+                SelectedTuningFrequency = (TuningFrequencyEnum)frequency;
         }
 
         private void PrepareCommands()
