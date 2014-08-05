@@ -54,7 +54,7 @@
     <Compile Include="Entities\Enums\MidiFormatTypeEnum.cs" />
     <Compile Include="Exceptions\InvalidMidiHeaderException.cs" />
     <Compile Include="Exceptions\InvalidHeaderLengthException.cs" />
-    <Compile Include="Extensions\ByteExtensions.cs" />
+    <Compile Include="Extensions\MyExtensions.cs" />
     <Compile Include="Exceptions\InvalidMidiFormatTypeException.cs" />
     <Compile Include="Exceptions\InvalidChunkHeaderException.cs" />
     <Compile Include="Parser.cs" />

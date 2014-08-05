@@ -12,6 +12,7 @@ namespace MidiParser
     {
         private const string MidiFileFormatIdentifier = "MThd";
         private const string MidiTrackChunkIdentifier = "MTrk";
+        private const int ExpectedMidiHeaderLength = 6;
 
         private MidiFile _midiFile;
         private BinaryReader _fileReader;
@@ -28,12 +29,6 @@ namespace MidiParser
             }
 
             return _midiFile;
-        }
-
-        // ToDo: FileType Enum (MidiFormatTypeEnum)
-        private static bool IsInvalidMidiFormatType(int fileType)
-        {
-            return fileType < 0 || fileType > 2;
         }
 
         private void ReadHeaderChunk()
@@ -59,8 +54,7 @@ namespace MidiParser
         {
             var headerLength = _fileReader.ReadBytes(4).ConvertToInt();
 
-            // ToDo: HeaderSize constant
-            if (headerLength != 6)
+            if (headerLength != ExpectedMidiHeaderLength)
                 throw new InvalidHeaderLengthException();
 
             _midiFile.FileHeader.HeaderLength = headerLength;
@@ -68,15 +62,21 @@ namespace MidiParser
 
         private void ReadMidiFormatType()
         {
-            var formatType = _fileReader.ReadBytes(2).ConvertToInt();
+            MidiFormatTypeEnum formatType;
 
-            if (IsInvalidMidiFormatType(formatType))
-                throw new InvalidMidiFormatTypeException();
+            try
+            {
+                formatType = _fileReader.ReadBytes(2).ConvertToInt().ConvertToEnum<MidiFormatTypeEnum>();
+            }
+            catch (InvalidCastException ex)
+            {
+                throw new InvalidMidiFormatTypeException(ex);
+            }
 
-            if ((MidiFormatTypeEnum)formatType == MidiFormatTypeEnum.MultipleTracksAsynchronously)
-                throw new NotImplementedException("MidiFormatType \"MultipleTracksAsynchronously (2)\" is not yet implemented!");
+            if (formatType == MidiFormatTypeEnum.MultipleTracksAsynchronously)
+                throw new NotSupportedException("MidiFormatType \"MultipleTracksAsynchronously (2)\" is not supported!");
 
-            _midiFile.FileHeader.Format = (MidiFormatTypeEnum) formatType;
+            _midiFile.FileHeader.Format = formatType;
         }
 
         private void ReadTrackCount()
@@ -143,7 +143,7 @@ namespace MidiParser
                 // Process all bytes, turning them into events
                 while (memoryStream.Position < memoryStream.Length)
                 {
-                    var deltaTime = GetDeltaTime(memoryStream);
+                    var deltaTime = GetVariableLengthValue(memoryStream);
                     var status = (byte) memoryStream.ReadByte();
                     
                     // ToDo: Hex values as constants
@@ -336,8 +336,7 @@ namespace MidiParser
             }
         }
 
-        // ToDo: Rename to GetVariableLengthValue and delete the other one
-        private static long GetDeltaTime(Stream stream)
+        private static long GetVariableLengthValue(Stream stream)
         {
             var currentByte = stream.ReadByte();
 
@@ -355,27 +354,6 @@ namespace MidiParser
             while (stream.Position < stream.Length && ((currentByte & 0x80) != 0));
 
             return deltaTime;
-        }
-
-        private static long GetVariableLengthValue(Stream stream)
-        {
-            var currentByte = stream.ReadByte();
-            long result = currentByte;
-
-            if ((currentByte & 0x80) != 0)
-            {
-                // Clear the "more data ahead" Bit
-                result &= 0x7f;
-
-                do
-                {
-                    currentByte = stream.ReadByte();
-                    result = (result << 7) + (currentByte & 0x7f);
-                }
-                while (stream.Position < stream.Length && ((currentByte & 0x80) != 0));
-            }
-
-            return result;
         }
     }
 }
