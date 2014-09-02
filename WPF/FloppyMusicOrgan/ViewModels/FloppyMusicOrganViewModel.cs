@@ -45,6 +45,7 @@ namespace FloppyMusicOrgan.ViewModels
         public bool IsResetDrivesButtonEnabled { get; set; }
         public bool IsComPortSelectionEnabled { get; set; }
         public bool IsPauseButtonEnabled { get; set; }
+        public bool IsPowerButtonEnabled { get; set; }
         public string ConnectButtonCaption { get; set; }
         public string PlayButtonCaption { get; set; }
         public ObservableCollection<string> AvailableComPorts { get; set; }
@@ -65,6 +66,7 @@ namespace FloppyMusicOrgan.ViewModels
         public ICommand TimePositionSlider_MouseLeftButtonDown { get; set; }
         public ICommand TimePositionSlider_MouseLeftButtonUp { get; set; }
         public ICommand TimePositionSlider_ValueChanged { get; set; }
+        public ICommand TogglePowerCommand { get; set; }
 
         private readonly IShow _show;
         private bool _isConnectedToComPort;
@@ -77,6 +79,7 @@ namespace FloppyMusicOrgan.ViewModels
         private bool _isPaused;
         private ConvertedMidiTrack _convertedMidiFile;
         private bool _allowUpdateSliderAutomatically;
+        private bool _isPoweredOn;
 
         public void Quit()
         {
@@ -120,6 +123,23 @@ namespace FloppyMusicOrgan.ViewModels
             TimePositionSlider_MouseLeftButtonDown = new DelegateCommand(x => OnTimePositionSlider_MouseLeftButtonDown());
             TimePositionSlider_MouseLeftButtonUp = new DelegateCommand(x => OnTimePositionSlider_MouseLeftButtonUp());
             TimePositionSlider_ValueChanged = new DelegateCommand(x => OnTimePositionSlider_ValueChanged());
+            TogglePowerCommand = new DelegateCommand(x => TogglePower());
+        }
+
+        private void TogglePower()
+        {
+            if (_isPoweredOn)
+            {
+                _comStreamer.SendPowerOffCommand();
+                _isPoweredOn = false;
+            }
+            else
+            {
+                _comStreamer.SendPowerOnCommand();
+                _isPoweredOn = true;
+            }
+
+            ToggleButtons();
         }
 
         private void OnTimePositionSlider_ValueChanged()
@@ -288,11 +308,12 @@ namespace FloppyMusicOrgan.ViewModels
 
         private void ToggleButtons()
         {
-            IsPlayButtonEnabled = _isConnectedToComPort && _isFileLoaded;
+            IsPlayButtonEnabled = _isConnectedToComPort && _isFileLoaded && _isPoweredOn;
             IsPauseButtonEnabled = _isPlayingFile && !_isPaused;
-            IsResetDrivesButtonEnabled = _isConnectedToComPort;
+            IsResetDrivesButtonEnabled = _isConnectedToComPort && _isPoweredOn;
             IsConnectButtonEnabled = SelectedMusicComPort != null;
             IsComPortSelectionEnabled = !_isConnectedToComPort;
+            IsPowerButtonEnabled = _isConnectedToComPort;
             
             ConnectButtonCaption = _isConnectedToComPort
                 ? "Disconnect"
@@ -302,7 +323,7 @@ namespace FloppyMusicOrgan.ViewModels
                 ? "Stop"
                 : "Play";
         }
-        
+
         public void SelectedComPortForMusicOutputChanged()
         {
             ToggleButtons();

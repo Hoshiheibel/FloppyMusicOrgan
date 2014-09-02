@@ -100,5 +100,17 @@ namespace ComOutput
             AvailableComPorts = new List<string>();
             AvailableComPorts.AddRange(SerialPort.GetPortNames());
         }
+
+        public void SendPowerOffCommand()
+        {
+            _port.Write(new byte[] { 126, 0, 0 }, 0, 3);
+            Thread.Sleep(500);
+        }
+
+        public void SendPowerOnCommand()
+        {
+            _port.Write(new byte[] { 127, 0, 0 }, 0, 3);
+            Thread.Sleep(500);
+        }
     }
 }
