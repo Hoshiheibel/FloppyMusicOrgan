@@ -50,6 +50,10 @@ unsigned int currentTick[]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
  byte portfdirection = 0;
  byte portl = 0;
  byte portldirection = 0;
+ 
+// byte portb = B00001000;
+ 
+ byte lastPeek;
 
 void setup(){
   
@@ -59,11 +63,18 @@ void setup(){
   DDRL = DDRC|B11111111;
   DDRF = DDRF|B11111111;
   
+  pinMode(50, OUTPUT);
+  digitalWrite(50, HIGH);
+  
+//  DDRB = DDRB|B11111111;
+  
   //Initialize all the output registers
   PORTA = porta;
   PORTC = portc;
   PORTL = portl;
   PORTF = portf;
+  
+//  PORTB = portb;
   
   Timer1.initialize(RESOLUTION); 
   Timer1.attachInterrupt(tick);
@@ -75,9 +86,39 @@ void loop()
 {
   if(Serial.available() > 2)
   {
-    if(Serial.peek() == 100)
+    lastPeek = Serial.peek();
+    
+    // reset drives to start position
+    if(lastPeek == 100)
     {
       resetAll();
+      while(Serial.available() > 0)
+      {
+        Serial.read();
+      }
+    }
+    // turn off power
+    else if(lastPeek == 126)
+    {
+      digitalWrite(50, HIGH);
+
+      delay(500);
+      resetAll();
+      
+      while(Serial.available() > 0)
+      {
+        Serial.read();
+      }
+    }
+    // turn on power
+    else if(lastPeek == 127)
+    {
+      digitalWrite(50, LOW);
+
+      //Wait for it to activate and reset the drives
+      delay(500);
+      resetAll();
+      
       while(Serial.available() > 0)
       {
         Serial.read();
@@ -620,6 +661,11 @@ void tick()
   portcdirection = portc;
   portfdirection = portf;
   portldirection = portl;
+}
+
+void togglePower()
+{
+  
 }
 
 void resetAll(){
