@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Windows;
+using System.Windows.Documents;
 using MidiParser.Entities.Enums;
 using MidiParser.Entities.MidiEvents;
 using MidiParser.Entities.MidiFile;
@@ -132,11 +134,7 @@ namespace MidiParser
 
         private void ParseTrack(Stream memoryStream, Track track)
         {
-            //long pos = 0; // current position in data
-            //bool running = false; // whether we're in running status
-            //int status = 0; // the current status byte
-            //bool sysExContinue = false; // whether we're in a multi-segment system exclusive message
-            //byte[] sysExData = null; // system exclusive data up to this point from a multi-segment message
+            var lastStatus = new byte();
 
             try
             {
@@ -145,53 +143,57 @@ namespace MidiParser
                 {
                     var deltaTime = GetVariableLengthValue(memoryStream);
                     var status = (byte) memoryStream.ReadByte();
-                    
-                    // ToDo: Hex values as constants
-                    // ToDo: Don't use _currentEventType member, pass it to methods instead
-                    if (status == 0xFF)
+
+                    var running = (status & 0x80) == 0;
+
+                    if (running)
+                    {
+                        status = lastStatus;
+                        memoryStream.Seek(- 1, SeekOrigin.Current);
+                    }
+
+                    if (!running)
+                        lastStatus = status;
+
+                    if ((MidiEventType)status == MidiEventType.MetaEvent)
                         ReadMetaEvent(memoryStream, deltaTime, track);
-                    else if (status == 0xF7)
-                        ReadSysExEvent(memoryStream, deltaTime, track, MidiEventTypeEnum.SysExContinuationEvent);
-                    else if (status == 0xF0)
-                        ReadSysExEvent(memoryStream, deltaTime, track, MidiEventTypeEnum.SysExEvent);
+                    else if ((MidiEventType)status == MidiEventType.SysExContinuationEvent)
+                        ReadSysExEvent(memoryStream, deltaTime, track, MidiEventType.SysExContinuationEvent);
+                    else if ((MidiEventType)status == MidiEventType.SysExEvent)
+                        ReadSysExEvent(memoryStream, deltaTime, track, MidiEventType.SysExEvent);
                     else
                     {
-                        // if (status != 0) // with running status, 'status' can be zero.
-                        // Midi Event
-                        //if ((status & 0x80) == 0)
-                        //    status = _lastStatus;
-
-                        switch (status.GetFirstNibble())
+                        switch ((MidiEventType)status.GetFirstNibble())
                         {
-                            // ToDo: as Enum
-                            case 0x80:  // Note Off
+                            // ToDo: Handle "All Notes Off"
+                            case MidiEventType.AllNotesOff:
+                                break;
+
+                            case MidiEventType.NoteOff:  // Note Off
                                 ParseNoteOffEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
-                            case 0x90:  // Note on
+                            case MidiEventType.NoteOn:  // Note on
                                 ParseNoteOnEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
-                            case 0xA0:  // Key aftertouch
+                            case MidiEventType.KeyAftertouch:  // Key aftertouch
                                 ParseKeyAftertouchEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
-                            case 0xB0:  // Controller Change event
+                            case MidiEventType.ControllerChange:  // Controller Change event
                                 ParseControllerChangeEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
-                            case 0xC0:  // Program change
+                            case MidiEventType.ProgramChange:  // Program change
                                 ParseProgramChangeEvent(memoryStream, deltaTime, status.GetSecondNibble(), track);
                                 break;
 
-                            case 0xD0:  // Channel Aftertouch event
+                            case MidiEventType.ChannelAftertouch:  // Channel Aftertouch event
                                 break;
 
-                            case 0xE0:  // Pitch Bend event
+                            case MidiEventType.PitchBend:  // Pitch Bend event
                                 ParsePitchBendEvent(memoryStream, status.GetSecondNibble());
-                                break;
-
-                            case 0xF0:
                                 break;
                         }
 
@@ -215,9 +217,7 @@ namespace MidiParser
 
         private static void FakeReadEvent(Stream stream, long deltaTime, int channelNumber, Track track)
         {
-            // ToDo: Extension to skip n bytes
-            stream.ReadByte();
-            stream.ReadByte();
+            stream.SkipBytes(2);
 
             track.TrackEventChain.Add(new BaseMidiChannelEvent
             {
@@ -231,10 +231,10 @@ namespace MidiParser
             FakeReadEvent(stream, deltaTime, channelNumber, track);
         }
 
-        private static void ReadSysExEvent(Stream stream, long deltaTime, Track track, MidiEventTypeEnum currentEventType)
+        private static void ReadSysExEvent(Stream stream, long deltaTime, Track track, MidiEventType currentEventType)
         {
             var length = GetVariableLengthValue(stream);
-            var offsetIncrement = currentEventType == MidiEventTypeEnum.SysExContinuationEvent ? 0 : 1;
+            var offsetIncrement = currentEventType == MidiEventType.SysExContinuationEvent ? 0 : 1;
             stream.Seek(length + offsetIncrement, SeekOrigin.Current);
 
             track.TrackEventChain.Add(new BaseMidiChannelEvent
@@ -297,8 +297,7 @@ namespace MidiParser
 
         private static void ParsePitchBendEvent(Stream stream, int channelNumber)
         {
-            stream.ReadByte();
-            stream.ReadByte();
+            stream.SkipBytes(2);
         }
 
         private static void ParseProgramChangeEvent(Stream stream, long deltaTime, int channelNumber, Track track)
@@ -309,7 +308,7 @@ namespace MidiParser
                 DeltaTime = deltaTime
             });
 
-            stream.ReadByte();
+            stream.SkipBytes(1);
         }
 
         private static void ReadMetaEvent(Stream stream, long deltaTime, Track track)
@@ -317,10 +316,9 @@ namespace MidiParser
             var eventType = (byte)stream.ReadByte();
             var length = GetVariableLengthValue(stream);
 
-            switch (eventType)
+            switch ((MidiEventType)eventType)
             {
-                // ToDo: Use Enum
-                case 0x51:
+                case MidiEventType.TempoChange:
                     ParseTempoChangeEvent(stream, deltaTime, track);
                     break;
 

@@ -133,7 +133,7 @@ namespace MidiToArduinoConverter
         }
 
         // ToDo: Split into several methods
-        // Separate parse from add
+        // ToDo: Separate parse from add
         private TimeSpan ParseAndAddMessage(BaseMidiChannelEvent midiEvent, ConvertedMidiTrack convertedMidiTrack, TimeSpan lastTime)
         {
             var timePosition = lastTime.Add(new TimeSpan(0, 0, 0, 0, (int)(midiEvent.DeltaTime * _ticksPerSecond / 100)));
@@ -241,7 +241,11 @@ namespace MidiToArduinoConverter
                         AbsoluteDeltaTimePosition = _currentAbsoluteDeltaPosition,
                         RelativeTimePosition = midiEvent.DeltaTime * _ticksPerSecond,
                         BPM = ((TempoChangeEvent)midiEvent).BPM,
-                        ComMessage = message2.ComMessage
+                        ComMessage = message2.ComMessage,
+                        OriginalMidiEvents = new List<BaseMidiChannelEvent>
+                        {
+                            midiEvent
+                        }
                     };
 
                     convertedMidiTrack.MessageList.Remove(message2);

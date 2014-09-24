@@ -47,7 +47,7 @@
     <Compile Include="Entities\MidiFile\Track.cs" />
     <Compile Include="Entities\MidiFile\TrackHeader.cs" />
     <Compile Include="Entities\Enums\TimeDivisionTypeEnum.cs" />
-    <Compile Include="Entities\Enums\MidiEventTypeEnum.cs" />
+    <Compile Include="Entities\Enums\MidiEventType.cs" />
     <Compile Include="Entities\MidiEvents\BaseMidiChannelEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOffEvent.cs" />
     <Compile Include="Entities\MidiEvents\NoteOnEvent.cs" />

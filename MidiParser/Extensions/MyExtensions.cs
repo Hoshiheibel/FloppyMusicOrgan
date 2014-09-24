@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -45,6 +46,12 @@ namespace MidiParser.Extensions
                 throw new InvalidCastException();
 
             return (T)source;
+        }
+
+        public static void SkipBytes(this Stream stream, int byteCountToSkip)
+        {
+            var buffer = new byte[byteCountToSkip];
+            stream.Read(buffer, 0, byteCountToSkip);
         }
     }
 }
