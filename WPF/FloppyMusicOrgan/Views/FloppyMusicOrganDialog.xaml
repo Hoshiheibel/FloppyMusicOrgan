@@ -3,10 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:views="clr-namespace:FloppyMusicOrgan.Views"
+        xmlns:converter="clr-namespace:FloppyMusicOrgan.Converter"
+        xmlns:enums="clr-namespace:MidiParser.Entities.Enums;assembly=MidiParser"
         Title="FloppyMusicOrgan"
         Height="421"
         Width="791"
         Closing="MainWindow_OnClosing">
+    <Window.Resources>
+        <converter:EnumValueToLocalizedStringConverter x:Key="EnumValueToLocalizedStringConverter" Type="enums:TuningFrequencyEnum"/>
+    </Window.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="27"></RowDefinition>
@@ -39,11 +45,11 @@
                   HorizontalAlignment="Left"
                   Margin="0,3,0,0" />
 
-        <ComboBox ItemsSource="{Binding AvailableTuningFrequencies}"
-                  SelectedItem="{Binding SelectedTuningFrequency, Mode=TwoWay}"
+        <ComboBox ItemsSource="{Binding Source={StaticResource EnumValueToLocalizedStringConverter}, Path=DisplayNames}"
+                  SelectedValue="{Binding SelectedTuningFrequency, Converter={StaticResource EnumValueToLocalizedStringConverter}}"
                   Grid.Row="0"
                   Grid.Column="1"
-                  Width="150"
+                  Width="200"
                   Height="22"
                   VerticalAlignment="Top"
                   HorizontalAlignment="Left"
@@ -58,7 +64,7 @@
                 Content="Load File"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Margin="320,3,0,0"
+                Margin="370,3,0,0"
                 Grid.Column="1"
                 Grid.Row="0"
                 Height="22"

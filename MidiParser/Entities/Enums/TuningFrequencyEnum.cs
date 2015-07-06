@@ -3,6 +3,7 @@
     public enum TuningFrequencyEnum
     {
         Frequency440Hz,
-        Frequency432Hz
+        Frequency432Hz,
+        Frequency440HzFullRange,
     }
 }

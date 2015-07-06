@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
-using System.Windows.Documents;
 using MidiParser.Entities.Enums;
 using MidiParser.Entities.MidiEvents;
 using MidiParser.Entities.MidiFile;

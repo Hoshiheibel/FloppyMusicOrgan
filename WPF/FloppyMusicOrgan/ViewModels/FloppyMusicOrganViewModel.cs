@@ -20,12 +20,12 @@ namespace FloppyMusicOrgan.ViewModels
 
         public FloppyMusicOrganViewModel()
         {
+            PopulateTuningFrequencyCombobox();
             InitSubControls();
             PrepareCommands();
             PrepareButtons();
             PrepareComStreamer();
             GetAvailableComPorts();
-            PopulateTuningFrequencyCombobox();
             PrepareMidiPlayer();
             ToggleButtons();
             _show = new Show();
@@ -170,6 +170,7 @@ namespace FloppyMusicOrgan.ViewModels
             AvailableTuningFrequencies = new ObservableCollection<TuningFrequencyEnum>();
             AvailableTuningFrequencies.Add(TuningFrequencyEnum.Frequency432Hz);
             AvailableTuningFrequencies.Add(TuningFrequencyEnum.Frequency440Hz);
+            AvailableTuningFrequencies.Add(TuningFrequencyEnum.Frequency440HzFullRange);
 
             SelectedTuningFrequency = TuningFrequencyEnum.Frequency432Hz;
         }

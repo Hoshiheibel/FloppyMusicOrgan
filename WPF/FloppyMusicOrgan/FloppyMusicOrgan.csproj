@@ -70,6 +70,8 @@
     <Compile Include="Common\IShow.cs" />
     <Compile Include="Common\PropertyChangedBase.cs" />
     <Compile Include="Common\Show.cs" />
+    <Compile Include="Converter\EnumValueToLocalizedStringConverter.cs" />
+    <Compile Include="Helper\EnumHelper.cs" />
     <Compile Include="ViewModels\EqualizerBarViewModel.cs" />
     <Compile Include="ViewModels\EqualizerViewModel.cs" />
     <Compile Include="ViewModels\FloppyMusicOrganViewModel.cs" />
