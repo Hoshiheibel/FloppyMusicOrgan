@@ -1,0 +1,176 @@
+﻿<Window x:Class="FloppyMusicOrgan.Views.FloppyMusicOrganDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:views="clr-namespace:FloppyMusicOrgan.Views"
+        xmlns:converter="clr-namespace:FloppyMusicOrgan.Converter"
+        xmlns:enums="clr-namespace:MidiParser.Entities.Enums;assembly=MidiParser"
+        Title="FloppyMusicOrgan"
+        Height="421"
+        Width="791"
+        Closing="MainWindow_OnClosing">
+    <Window.Resources>
+        <converter:EnumValueToLocalizedStringConverter x:Key="EnumValueToLocalizedStringConverter" Type="enums:TuningFrequencyEnum"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="27"></RowDefinition>
+            <RowDefinition Height="100"></RowDefinition>
+            <RowDefinition Height="27*"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="450"
+                              MinWidth="320" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <ComboBox ItemsSource="{Binding AvailableComPorts}"
+                  SelectedItem="{Binding SelectedMusicComPort}"
+                  IsEnabled="{Binding IsComPortSelectionEnabled}"
+                  SelectionChanged="ComPortMusicOutput_OnSelectionChanged"
+                  Grid.Row="0"
+                  Grid.Column="1"
+                  Width="150"
+                  Height="22"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Left"
+                  Margin="0,3,0,0" />
+
+        <ComboBox ItemsSource="{Binding Source={StaticResource EnumValueToLocalizedStringConverter}, Path=DisplayNames}"
+                  SelectedValue="{Binding SelectedTuningFrequency, Converter={StaticResource EnumValueToLocalizedStringConverter}}"
+                  Grid.Row="0"
+                  Grid.Column="1"
+                  Width="200"
+                  Height="22"
+                  VerticalAlignment="Top"
+                  HorizontalAlignment="Left"
+                  Margin="160,3,0,0" />
+
+        <Label Content="{Binding CurrentFileName}"
+               Width="Auto"
+               Grid.Row="1"
+               Grid.Column="1" />
+
+        <Button Command="{Binding LoadMidiFileCommand}"
+                Content="Load File"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="370,3,0,0"
+                Grid.Column="1"
+                Grid.Row="0"
+                Height="22"
+                RenderTransformOrigin="-1.17,0.727" />
+
+        <Button Command="{Binding TogglePowerCommand}"
+                IsEnabled="{Binding IsPowerButtonEnabled}"
+                Content="Power"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,5,3"
+                Grid.Column="1"
+                Grid.Row="6"
+                Height="22" />
+
+        <Button IsEnabled="{Binding IsConnectButtonEnabled}"
+                Command="{Binding ConnectCommand}"
+                Content="{Binding ConnectButtonCaption, FallbackValue=Connect}"
+                Width="80"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,3"
+                Grid.Column="1"
+                Grid.Row="6"
+                Height="22" />
+
+        <Button IsEnabled="{Binding IsResetDrivesButtonEnabled}"
+                Command="{Binding ResetDrivesCommand}"
+                Content="Reset drives"
+                Width="90"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="90,0,0,3"
+                Grid.Column="1"
+                Grid.Row="6"
+                Height="22" />
+
+        <Button IsEnabled="{Binding IsPauseButtonEnabled}"
+                Command="{Binding PauseCommand}"
+                Content="Pause"
+                Width="60"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="190,0,0,3"
+                Grid.Column="1"
+                Grid.Row="6"
+                Height="22" />
+
+        <Label Grid.Column="1"
+               HorizontalAlignment="Left"
+               Margin="0,0,0,0"
+               Content="{Binding CurrentTimePosition}"
+               Grid.Row="3"
+               VerticalAlignment="Top"
+               Width="Auto" />
+
+        <Slider Grid.Column="1"
+                HorizontalAlignment="Stretch"
+                Minimum="0"
+                Maximum="{Binding MaximumSliderPosition}"
+                Value="{Binding CurrentSliderPosition}"
+                Margin="40,0,40,0"
+                Grid.Row="3"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Stretch"
+                Width="Auto">
+
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="PreviewMouseDown">
+                    <i:InvokeCommandAction Command="{Binding TimePositionSlider_MouseLeftButtonDown}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="PreviewMouseUp">
+                    <i:InvokeCommandAction Command="{Binding TimePositionSlider_MouseLeftButtonUp}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="ValueChanged">
+                    <i:InvokeCommandAction Command="{Binding TimePositionSlider_ValueChanged}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </Slider>
+
+        <Label Grid.Column="1"
+               HorizontalAlignment="Right"
+               Margin="0,0,0,0"
+               Content="{Binding TotalTime, FallbackValue=00:00}"
+               Grid.Row="3"
+               VerticalAlignment="Top"
+               Width="Auto" />
+
+        <Button IsEnabled="{Binding IsPlayButtonEnabled}"
+                Command="{Binding PlayCommand}"
+                Content="{Binding PlayButtonCaption, FallbackValue=Play}"
+                Width="50"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="260,0,0,3"
+                Grid.Column="1"
+                Grid.Row="6"
+                Height="22" />
+
+        <GridSplitter Grid.Column="2"
+                      Grid.Row="0"
+                      HorizontalAlignment="Stretch"
+                      Grid.RowSpan="7" />
+        <views:EqualizerView Grid.Column="3"
+                             Grid.Row="0"
+                             Grid.RowSpan="6"
+                             DataContext="{Binding EqualizerViewModel}" />
+    </Grid>
+</Window>
