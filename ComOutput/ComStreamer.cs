@@ -9,6 +9,11 @@ namespace ComOutput
 {
     public class ComStreamer
     {
+        private const byte ResetDriveCommand = 100;
+        private const byte PowerOffCommand = 126;
+        private const byte PowerOnCommand = 127;
+        private const int BaudRate = 115200;
+
         private SerialPort _port;
 
         public ComStreamer()
@@ -18,18 +23,15 @@ namespace ComOutput
 
         public List<string> AvailableComPorts { get; private set; }
 
-        public bool IsConnected
-        {
-            get { return _port != null && _port.IsOpen; }
-        }
+        public bool IsConnected => _port != null && _port.IsOpen;
 
         public void SendResetDrivesCommand()
         {
-            if (_port != null && _port.IsOpen)
-            {
-                _port.Write(new byte[] {100, 0, 0}, 0, 3);
-                Thread.Sleep(500);
-            }
+            if (_port == null || !_port.IsOpen)
+                return;
+
+            _port.Write(new byte[] { ResetDriveCommand, 0, 0}, 0, 3);
+            Thread.Sleep(500);
         }
 
         public bool Connect(string portName)
@@ -37,7 +39,7 @@ namespace ComOutput
             try
             {
                 if (_port == null)
-                    _port = new SerialPort(portName, 115200, Parity.None, 8, StopBits.One);
+                    _port = new SerialPort(portName, BaudRate, Parity.None, 8, StopBits.One);
 
                 _port.Open();
             }
@@ -64,11 +66,11 @@ namespace ComOutput
 
         public void Dispose()
         {
-            if (_port != null)
-            {
-                _port.Dispose();
-                _port = null;
-            }
+            if (_port == null)
+                return;
+
+            _port.Dispose();
+            _port = null;
         }
 
         public void SendStopCommand()
@@ -78,38 +80,28 @@ namespace ComOutput
 
             var message = new ArduinoMessage
             {
-                ComMessage = new byte[0]
+                ComMessage = Enumerable
+                    .Repeat((byte)0, 48)
+                    .ToArray()
             };
-
-            for (var i = 0; i < 16; i++)
-            {
-                message.ComMessage = message.ComMessage.Concat(new[]
-                    {
-                        (byte) (i + 1),
-                        (byte) 0,
-                        (byte) 0
-                    })
-                    .ToArray();
-            }
             
             SendCommand(message.ComMessage);
         }
 
         private void GetAvailableComPorts()
         {
-            AvailableComPorts = new List<string>();
-            AvailableComPorts.AddRange(SerialPort.GetPortNames());
+            AvailableComPorts = new List<string>(SerialPort.GetPortNames());
         }
 
         public void SendPowerOffCommand()
         {
-            _port.Write(new byte[] { 126, 0, 0 }, 0, 3);
+            _port.Write(new byte[] { PowerOffCommand, 0, 0 }, 0, 3);
             Thread.Sleep(500);
         }
 
         public void SendPowerOnCommand()
         {
-            _port.Write(new byte[] { 127, 0, 0 }, 0, 3);
+            _port.Write(new byte[] { PowerOnCommand, 0, 0 }, 0, 3);
             Thread.Sleep(500);
         }
     }
