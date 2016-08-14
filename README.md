@@ -45,4 +45,12 @@ In order to build this project you only need to install the Visual Studio Extens
 
 ## How it works
 
---- Coming soon ---
+When you open a MIDI file, the parser converts the notes from the MIDI file to instructions that the arduino can
+
+use. For exemple, when you read a midi file and there is a NOTE_ON command, the parser reads it and tells the arduino
+
+to play this note, on the right channel and with the right frequency.
+
+The arduino play the note and counts how many pulse they are so it knows when the reverse
+
+the direction of the motor.
